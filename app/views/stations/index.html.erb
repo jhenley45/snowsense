@@ -1,1 +1,6 @@
-<h1>MEOW</h1>
+<h1>Your Stations</h1>
+
+<%= form_for @new_station, url: {action: "create"} do |f| %>
+  Station ID: <%= f.text_field :stid %>
+  <%= f.submit "Add Station" %>
+<% end %>

@@ -19,7 +19,12 @@ class StationsController < ApplicationController
       existing_station = Station.find_by_stid(station["STID"])
 
       if existing_station
-        current_user.stations.create(existing_station)
+        if current_user.stations.find_by_stid(existing_station.stid)
+          flash[:warning] = "Station already exists."
+        else
+          current_user.stations << existing_station
+          flash[:success] = "Station has been added to your profile."
+        end
       else
         new_station = Station.create(
           name: station["NAME"],
@@ -31,7 +36,10 @@ class StationsController < ApplicationController
         )
 
         current_user.stations << new_station
+        flash[:success] = "Station has been added to your profile."
       end
+
+
     end
 
     redirect_to action: 'index'

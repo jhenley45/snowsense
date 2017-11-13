@@ -1,3 +1,14 @@
+html, body {
+  height: 100%;
+}
+
 .content {
   background-color: #edf0f5;
+  padding-top: 1em;
+  height: 100%;
+}
+
+
+.alert {
+  margin-bottom: 0em !important;
 }

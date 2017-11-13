@@ -185,6 +185,16 @@ class StationsController < ApplicationController
     redirect_to action: 'index'
   end
 
+  def destroy
+    station_id = params[:id]
+    station = Station.find(station_id)
+    current_user.stations.delete(station)
+
+    flash[:success] = "Station has been removed from your profile."
+
+    redirect_to action: 'index'
+  end
+
   private
 
   def station_params

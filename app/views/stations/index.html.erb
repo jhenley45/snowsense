@@ -1,6 +1,48 @@
-<h1>Your Stations</h1>
+<h1>My Stations</h1>
 
 <%= form_for @new_station, url: {action: "create"} do |f| %>
   Station ID: <%= f.text_field :stid %>
   <%= f.submit "Add Station" %>
+<% end %>
+
+
+
+<% @station_data.each do |station| %>
+
+  <div class="station">
+
+    <div class="col-xs-12">
+      <h2 class="station-title"><%= station[:name] %> (<%= station[:stid] %>)</h2>
+    </div>
+
+    <% station[:tables].each do |table| %>
+      <h3><%= table[:title] %></h3>
+
+      <table class="table station-table">
+        <thead>
+          <tr>
+            <th scope="col"></th>
+            <th scope="col">Past 24</th>
+            <th scope="col">Past 48</th>
+            <th scope="col">Past 72</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% table[:rows].each do |datum| %>
+            <tr>
+              <th scope="row"><%= table[:short_title] %> <%= datum[:spec] %></th>
+              <td><%= datum[:hourly][:twenty_four] || 'N/A' %></td>
+              <td><%= datum[:hourly][:fourty_eight] || 'N/A' %></td>
+              <td><%= datum[:hourly][:seventy_two] || 'N/A' %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+
+    <% end %>
+
+
+
+  </div>
+
 <% end %>

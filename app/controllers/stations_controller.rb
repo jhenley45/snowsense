@@ -1,8 +1,148 @@
 class StationsController < ApplicationController
 
+  CLIMATOLOGY_URL = "http://api.mesowest.net/v2/stations/climatology?&startclim=07010000&endclim=07020000&units=ENGLISH&obtimezone=local&token=#{ENV['MESO_API_TOKEN']}"
+  STATISTICS_URL = "http://api.mesowest.net/v2/stations/statistics?&type=all&units=ENGLISH&obtimezone=local&token=#{ENV['MESO_API_TOKEN']}"
+  LATEST_URL = "http://api.mesowest.net/v2/stations/latest?&units=ENGLISH&within=14400&obtimezone=local&token=#{ENV['MESO_API_TOKEN']}"
+  # no good, doesn't give snow data
+  # PRECIP_URL = "http://api.mesowest.net/v2/stations/precipitation?&units=ENGLISH&start=201711011800&end=201711111800&obtimezone=local&token=#{ENV['MESO_API_TOKEN']}"
+  TIMESERIES_URL = "http://api.mesowest.net/v2/stations/timeseries?&units=ENGLISH&obtimezone=local&showemptystations=1&token=#{ENV['MESO_API_TOKEN']}"
+  NEAREST_URL = "http://api.mesowest.net/v2/stations/nearesttime?&atttime=201711121200&units=ENGLISH&obtimezone=local&showemptystations=1&token=#{ENV['MESO_API_TOKEN']}"
 
   def index
     @new_station = Station.new
+
+    @station_data = []
+
+    @stations = current_user.stations
+    station_ids = @stations.collect(&:stid)
+    stations_string = station_ids.join(",")
+
+    now = DateTime.now.utc
+
+    start_time = now.strftime("%Y%m%d%H%M")
+    back_24 = (now - 24.hours).strftime("%Y%m%d%H%M")
+    back_48 = (now - 48.hours).strftime("%Y%m%d%H%M")
+    back_72 = (now - 72.hours).strftime("%Y%m%d%H%M")
+
+    stats_url = STATISTICS_URL + "&stids=#{stations_string}"
+    stats_24 = stats_url + "&end=#{start_time}&start=#{back_24}"
+    stats_48 = stats_url + "&end=#{start_time}&start=#{back_48}"
+    stats_72 = stats_url + "&end=#{start_time}&start=#{back_72}"
+
+    stats_24_json = JSON.parse(HTTParty.get(stats_24, format: :plain))
+    stats_48_json = JSON.parse(HTTParty.get(stats_48, format: :plain))
+    stats_72_json = JSON.parse(HTTParty.get(stats_72, format: :plain))
+
+    timeseries_url = TIMESERIES_URL + "&stids=#{stations_string}"
+    timeseries_24 = timeseries_url + "&end=#{start_time}&start=#{back_24}"
+    timeseries_48 = timeseries_url + "&end=#{start_time}&start=#{back_48}"
+    timeseries_72 = timeseries_url + "&end=#{start_time}&start=#{back_72}"
+
+    timeseries_24_json = JSON.parse(HTTParty.get(timeseries_24, format: :plain))
+    timeseries_48_json = JSON.parse(HTTParty.get(timeseries_48, format: :plain))
+    timeseries_72_json = JSON.parse(HTTParty.get(timeseries_72, format: :plain))
+
+    @stations.each do |station|
+      data_24 = stats_24_json["STATION"].find { |hash| hash["STID"].upcase == station.stid.upcase}
+      data_48 = stats_48_json["STATION"].find { |hash| hash["STID"].upcase == station.stid.upcase}
+      data_72 = stats_72_json["STATION"].find { |hash| hash["STID"].upcase == station.stid.upcase}
+
+      object = {}
+      object[:name] = station.name
+      object[:stid] = station.stid
+      object[:tables] = []
+
+      temp_table = { title: "Temperature", short_title: "Temp", rows: [] }
+
+      temp_min = { spec: "Min", hourly: {} }
+      temp_min[:hourly][:twenty_four]   = dig_deep(data_24["STATISTICS"], ["air_temp_set_1", "minimum"])
+      temp_min[:hourly][:fourty_eight]  = dig_deep(data_48["STATISTICS"], ["air_temp_set_1", "minimum"])
+      temp_min[:hourly][:seventy_two]   = dig_deep(data_72["STATISTICS"], ["air_temp_set_1", "minimum"])
+      temp_table[:rows].push(temp_min)
+
+      temp_avg = { spec: "Avg", hourly: {} }
+      temp_avg[:hourly][:twenty_four]   = dig_deep(data_24["STATISTICS"], ["air_temp_set_1", "average"])
+      temp_avg[:hourly][:fourty_eight]  = dig_deep(data_48["STATISTICS"], ["air_temp_set_1", "average"])
+      temp_avg[:hourly][:seventy_two]   = dig_deep(data_72["STATISTICS"], ["air_temp_set_1", "average"])
+      temp_table[:rows].push(temp_avg)
+
+      temp_max = { spec: "Max", hourly: {} }
+      temp_max[:hourly][:twenty_four]   = dig_deep(data_24["STATISTICS"], ["air_temp_set_1", "maximum"])
+      temp_max[:hourly][:fourty_eight]  = dig_deep(data_48["STATISTICS"], ["air_temp_set_1", "maximum"])
+      temp_max[:hourly][:seventy_two]   = dig_deep(data_72["STATISTICS"], ["air_temp_set_1", "maximum"])
+      temp_table[:rows].push(temp_max)
+
+      object[:tables].push(temp_table)
+
+
+      wind_table = { title: "Wind Speed", short_title: "Speed", rows: [] }
+
+      wind_min = { spec: "Min", hourly: {} }
+      wind_min[:hourly][:twenty_four]   = dig_deep(data_24["STATISTICS"], ["wind_speed_set_1", "minimum"])
+      wind_min[:hourly][:fourty_eight]  = dig_deep(data_48["STATISTICS"], ["wind_speed_set_1", "minimum"])
+      wind_min[:hourly][:seventy_two]   = dig_deep(data_72["STATISTICS"], ["wind_speed_set_1", "minimum"])
+      wind_table[:rows].push(wind_min)
+
+      wind_avg = { spec: "Avg", hourly: {} }
+      wind_avg[:hourly][:twenty_four]   = dig_deep(data_24["STATISTICS"], ["wind_speed_set_1", "average"])
+      wind_avg[:hourly][:fourty_eight]  = dig_deep(data_48["STATISTICS"], ["wind_speed_set_1", "average"])
+      wind_avg[:hourly][:seventy_two]   = dig_deep(data_72["STATISTICS"], ["wind_speed_set_1", "average"])
+      wind_table[:rows].push(wind_avg)
+
+      wind_max = { spec: "Max", hourly: {} }
+      wind_max[:hourly][:twenty_four]   = dig_deep(data_24["STATISTICS"], ["wind_speed_set_1", "maximum"])
+      wind_max[:hourly][:fourty_eight]  = dig_deep(data_48["STATISTICS"], ["wind_speed_set_1", "maximum"])
+      wind_max[:hourly][:seventy_two]   = dig_deep(data_72["STATISTICS"], ["wind_speed_set_1", "maximum"])
+      wind_table[:rows].push(wind_max)
+
+      object[:tables].push(wind_table)
+
+      @station_data.push(object)
+    end
+
+    # For current snow depth and air temp. Take last value in array
+    # "OBSERVATIONS"=>
+    # {"date_time"=>["2017-11-12T14:00:00-0700"],
+    #  "volt_set_1"=>[13.8],
+    #  "snow_interval_set_1"=>[4.0],
+    #  "dew_point_temperature_set_1d"=>[16.54],
+    #  "precip_accum_fifteen_minute_set_1"=>[0.0],
+    #  "snow_depth_set_1"=>[33.0],
+    #  "relative_humidity_set_1"=>[55.0],
+    #  "air_temp_set_1"=>[30.99]},
+    # current = TIMESERIES_URL + "&stids=#{stations_string}"
+    # current_response = HTTParty.get(current, format: :plain)
+    # current_json = JSON.parse(current_response)
+
+
+    # For recent snowfall over a period of time from present. Is this 24 hours??
+    # "OBSERVATIONS"=>
+    #   "snow_interval_value_1"=>
+    #    {"date_time"=>"2017-11-12T14:15:00-0700", "value"=>4.0},
+    # latest = LATEST_URL + "&stids=#{stations_string}"
+    # latest_response = HTTParty.get(latest, format: :plain)
+    # latest_json = JSON.parse(latest_response)
+
+
+    # {"volt_set_1"=>{"date_time"=>"2017-11-11T11:00:00-0700", "maximum"=>14.8},
+    #   "snow_interval_set_1"=>
+    #    {"date_time"=>"2017-11-01T22:30:00-0600", "maximum"=>45.0},
+    #   "precip_accum_fifteen_minute_set_1"=>
+    #    {"date_time"=>"2017-11-06T18:00:00-0700", "maximum"=>0.06},
+    #   "snow_depth_set_1"=>
+    #    {"date_time"=>"2017-11-06T14:15:00-0700", "maximum"=>167.0},
+    #   "relative_humidity_set_1"=>
+    #    {"date_time"=>"2017-11-03T20:45:00-0600", "maximum"=>99.0},
+    #   "air_temp_set_1"=>
+    #    {"date_time"=>"2017-11-01T15:15:00-0600", "maximum"=>37.99}},
+    # stats = STATISTICS_URL + "&stids=#{stations_string}"
+    # stats_response = HTTParty.get(stats, format: :plain)
+    # stats_json = JSON.parse(stats_response)
+
+
+    # stats = NEAREST_URL + "&stids=#{stations_string}"
+    # stats_response = HTTParty.get(stats, format: :plain)
+    # stats_json = JSON.parse(stats_response)
   end
 
   def create
@@ -49,5 +189,18 @@ class StationsController < ApplicationController
 
   def station_params
     params.require(:station).permit(:stid)
+  end
+
+  def dig_deep(hash, keys)
+    current_place = hash
+
+    value = keys.each_with_index do |key, index|
+      break nil if !current_place
+      break current_place[key] if index == keys.length - 1
+
+      current_place = current_place[key]
+    end
+
+    return value
   end
 end

@@ -74,9 +74,15 @@
 
     <% end %>
 
-    <h3>Graphs yo</h3>
+    <div class="charts">
 
-    <div id="temperature-chart"></div>
+      <h3>Graphs yo</h3>
+
+      <span></span>
+
+      <div id="temperature-chart-<%= station[:stid] %>"></div>
+
+    </div>
 
   </div>
 
@@ -88,20 +94,37 @@
 $(document).ready(function() {
 
   $.ajax({
-     url: '/stations/2/timeseries',
-     data: {
-        format: 'json',
-        days_back: 1
-     },
+     url: '/station_list',
      dataType: 'json',
      type: 'GET'
   }).done(function(data) {
-        drawChart(data);
+      data.forEach(function(station) {
+        getChartData(station, 4);
+      });
   }).fail(function(error) {
-       console.log(error);
+      console.log(error);
   });
 
-  var drawChart = function(data) {
+  var getChartData = function(station, daysBack) {
+    var url = '/stations/' + station.id + '/timeseries';
+    $.ajax({
+       url: url,
+       data: {
+          format: 'json',
+          days_back: daysBack
+       },
+       dataType: 'json',
+       type: 'GET'
+    }).done(function(data) {
+          drawChart(data, station.stid);
+    }).fail(function(error) {
+         console.log(error);
+    });
+  };
+
+
+
+  var drawChart = function(data, stid) {
 
     var tempData;
     var tempCategories;
@@ -109,15 +132,17 @@ $(document).ready(function() {
     tempData        = data.map(function(datum) { return datum.temperature });
     tempCategories  = data.map(function(datum) { return datum.date_time });
 
-    Highcharts.chart('temperature-chart', {
+    var element = 'temperature-chart-' + stid;
+
+    Highcharts.chart(element, {
         chart: {
             type: 'line'
         },
         title: {
-            text: 'Monthly Average Temperature'
+            text: 'Historical Temperature'
         },
         subtitle: {
-            text: 'Source: WorldClimate.com'
+            text: 'Source: MesoWest'
         },
         xAxis: {
             categories: tempCategories,
@@ -142,7 +167,7 @@ $(document).ready(function() {
             }
         },
         series: [{
-            name: 'Temperature',
+            name: 'Temperature (°F)',
             data: tempData
         }]
     });

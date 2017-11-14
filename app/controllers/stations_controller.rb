@@ -213,6 +213,21 @@ class StationsController < ApplicationController
     render json: data
   end
 
+  def station_list
+    @stations = current_user.stations
+
+    station_data = @stations.map do |station|
+      obj = {}
+      obj[:id] = station.id
+      obj[:station] = station.name
+      obj[:stid] = station.stid
+      obj
+    end
+
+    render json: station_data
+  end
+
+
   private
 
   def station_params

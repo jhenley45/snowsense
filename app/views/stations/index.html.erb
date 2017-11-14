@@ -75,15 +75,18 @@
     <% end %>
 
     <div class="charts">
+      <div class="row">
+        <div class="col-md-4">
+          <h3>Graphs yo</h3>
+        </div>
 
-      <h3>Graphs yo</h3>
+        <div class="day-selector col-md-4 pull-right">
+          <span>Go back
+            <input class="days-back" placeholder="3"> days
+            <button class="change-days">GO</button>
+          </span>
 
-      <div class="day-selector">
-        <span>Time frame:
-          <input class="days-back" placeholder="3"> Days
-          <button class="change-days">GO</button>
-        </span>
-
+        </div>
       </div>
 
       <div id="temperature-chart-<%= station[:stid] %>" class="temperature-chart loading-icon" data-stationId="<%= station[:id] %>"></div>
@@ -201,11 +204,11 @@ var drawChart = function(data, stid) {
 
 var addDaysBackInputHandler = function() {
 
-  var fetchTempData = function(e) {
+  var fetchTemperatureData = function(e) {
     var $target     = $(e.target);
-    var $selector   = $target.closest('.day-selector');
-    var $chartDiv   = $selector.siblings('.temperature-chart');
-    var daysBack    = $selector.find('.days-back').val();
+    var $charts     = $target.closest('.charts');
+    var $chartDiv   = $charts.find('.temperature-chart');
+    var daysBack    = $charts.find('.days-back').val();
     var stationId   = $chartDiv.attr('data-stationId');
     var station     = findStation(parseInt(stationId));
 
@@ -232,10 +235,25 @@ var addDaysBackInputHandler = function() {
   };
 
   var handleInput = function(e) {
+    var $target     = $(e.target);
+    var $selector   = $target.closest('.day-selector');
+    var daysBack    = $selector.find('.days-back').val();
 
+    removeError($selector);
+
+    var error = undefined;
+
+    if (!parseInt(daysBack)) {
+      error = "You must input a number.";
+    } else if (parseInt(daysBack) > 60) {
+      error = "You may only look back 60 days";
+    }
+
+    if (error) addError(error, $selector);
+    else fetchTemperatureData(e);
   };
 
-  $('.change-days').click(fetchTempData)
+  $('.change-days').click(handleInput);
 };
 
 var findStation = function(stationId) {
@@ -244,6 +262,16 @@ var findStation = function(stationId) {
             return stations[i]; // Return as soon as the object is found
     }
     return null; // The object was not found
+};
+
+var addError = function(text, $element) {
+  var span = $('<span class="error-message">' + text + '</span>');
+  $element.append(span);
+};
+
+var removeError = function($element) {
+  var $errorMessage = $element.find('.error-message');
+  if ($errorMessage.length > 0) $errorMessage.remove();
 }
 
 </script>

@@ -16,3 +16,15 @@
   background: no-repeat center image_url("loading.svg");
   width: 100%;
 }
+
+.error-message {
+  background-color: #f2dede;
+  border-color: #ebcccc;
+  color: #a94442;
+  display: block;
+  padding: 10px;
+  margin-bottom: 1rem;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  margin: 10px 0;
+}

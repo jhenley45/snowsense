@@ -78,9 +78,15 @@
 
       <h3>Graphs yo</h3>
 
-      <span></span>
+      <div class="day-selector">
+        <span>Time frame:
+          <input class="days-back" placeholder="3"> Days
+          <button class="change-days">GO</button>
+        </span>
 
-      <div id="temperature-chart-<%= station[:stid] %>" class="loading-icon"></div>
+      </div>
+
+      <div id="temperature-chart-<%= station[:stid] %>" class="temperature-chart loading-icon" data-stationId="<%= station[:id] %>"></div>
 
     </div>
 
@@ -93,90 +99,151 @@
 
 $(document).ready(function() {
 
+  getStationList();
+  addDaysBackInputHandler();
+
+});
+
+var stations;
+
+var onInitialChartLoad = function(data, station) {
+  drawChart(data, station.stid);
+};
+
+var getStationList = function() {
   $.ajax({
      url: '/station_list',
      dataType: 'json',
      type: 'GET'
   }).done(function(data) {
+      stations = data;
+
       data.forEach(function(station) {
-        getChartData(station, 4);
+        getChartData(station, 3, onInitialChartLoad);
       });
   }).fail(function(error) {
       console.log(error);
   });
+};
 
-  var getChartData = function(station, daysBack) {
-    var url = '/stations/' + station.id + '/timeseries';
-    $.ajax({
-       url: url,
-       data: {
-          format: 'json',
-          days_back: daysBack
-       },
-       dataType: 'json',
-       type: 'GET'
-    }).done(function(data) {
-          drawChart(data, station.stid);
-    }).fail(function(error) {
-         console.log(error);
-    });
+
+var getChartData = function(station, daysBack, onSuccess) {
+  var url = '/stations/' + station.id + '/timeseries';
+  $.ajax({
+     url: url,
+     data: {
+        format: 'json',
+        days_back: daysBack
+     },
+     dataType: 'json',
+     type: 'GET'
+  }).done(function(data) {
+      onSuccess(data, station)
+  }).fail(function(error) {
+      console.log(error);
+  });
+};
+
+
+
+var drawChart = function(data, stid) {
+
+  var tempData;
+  var tempCategories;
+
+  tempData        = data.map(function(datum) { return datum.temperature });
+  tempCategories  = data.map(function(datum) { return new Date(datum.date_time).toLocaleString("en-US") });
+
+  var element = 'temperature-chart-' + stid;
+
+  $('#' + element).removeClass('loading-icon');
+
+  Highcharts.chart(element, {
+      chart: {
+          type: 'line'
+      },
+      title: {
+          text: 'Historical Temperature'
+      },
+      subtitle: {
+          text: 'Source: MesoWest'
+      },
+      xAxis: {
+          categories: tempCategories,
+          labels: {
+              rotation: 45
+          },
+          minTickInterval: 10
+      },
+      yAxis: {
+          title: {
+              text: 'Temperature (°F)'
+          }
+      },
+      tooltip: {
+          formatter: function() {
+              return 'The temperature on' + this.x + ' was <b>' + this.y + '</b> degrees Farenheit';
+          }
+      },
+      plotOptions: {
+          line: {
+
+          }
+      },
+      series: [{
+          name: 'Temperature (°F)',
+          data: tempData
+      }]
+  });
+
+};
+
+
+var addDaysBackInputHandler = function() {
+
+  var fetchTempData = function(e) {
+    var $target     = $(e.target);
+    var $selector   = $target.closest('.day-selector');
+    var $chartDiv   = $selector.siblings('.temperature-chart');
+    var daysBack    = $selector.find('.days-back').val();
+    var stationId   = $chartDiv.attr('data-stationId');
+    var station     = findStation(parseInt(stationId));
+
+    var chart = $chartDiv.highcharts();
+    var seriesLength = chart.series.length;
+    for (var i = seriesLength -1; i > -1; i--) {
+        chart.series[i].remove();
+    };
+    chart.showLoading();
+
+    var onSuccess = function(data, station) {
+      var tempData        = data.map(function(datum) { return datum.temperature });
+      var tempCategories  = data.map(function(datum) { return new Date(datum.date_time).toLocaleString("en-US") });
+
+      chart.addSeries({
+        data: tempData
+      });
+
+      chart.xAxis[0].setCategories(tempCategories);
+      chart.hideLoading();
+    };
+
+    getChartData(station, daysBack, onSuccess);
   };
 
-
-
-  var drawChart = function(data, stid) {
-
-    var tempData;
-    var tempCategories;
-
-    tempData        = data.map(function(datum) { return datum.temperature });
-    tempCategories  = data.map(function(datum) { return new Date(datum.date_time).toLocaleString("en-US") });
-
-    var element = 'temperature-chart-' + stid;
-
-    $('#' + element).removeClass('loading-icon')
-
-    Highcharts.chart(element, {
-        chart: {
-            type: 'line'
-        },
-        title: {
-            text: 'Historical Temperature'
-        },
-        subtitle: {
-            text: 'Source: MesoWest'
-        },
-        xAxis: {
-            categories: tempCategories,
-            labels: {
-                step: 10,
-                rotation: 45
-            }
-        },
-        yAxis: {
-            title: {
-                text: 'Temperature (°F)'
-            }
-        },
-        tooltip: {
-            formatter: function() {
-                return 'The value for <b>' + this.x + '</b> is <b>' + this.y + '</b>, in series '+ this.series.name;
-            }
-        },
-        plotOptions: {
-            line: {
-
-            }
-        },
-        series: [{
-            name: 'Temperature (°F)',
-            data: tempData
-        }]
-    });
+  var handleInput = function(e) {
 
   };
 
-});
+  $('.change-days').click(fetchTempData)
+};
 
+var findStation = function(stationId) {
+    for (var i = 0, len = stations.length; i < len; i++) {
+        if (stations[i].id === stationId)
+            return stations[i]; // Return as soon as the object is found
+    }
+    return null; // The object was not found
+}
 
 </script>

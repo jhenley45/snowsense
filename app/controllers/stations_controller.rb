@@ -39,6 +39,7 @@ class StationsController < ApplicationController
       data_72 = stats_72_json["STATION"].find { |hash| hash["STID"].upcase == station.stid.upcase}
 
       object = {}
+      object[:id] = station.id
       object[:name] = station.name
       object[:stid] = station.stid
       object[:tables] = []

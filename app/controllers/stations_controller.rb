@@ -33,15 +33,6 @@ class StationsController < ApplicationController
     stats_48_json = JSON.parse(HTTParty.get(stats_48, format: :plain))
     stats_72_json = JSON.parse(HTTParty.get(stats_72, format: :plain))
 
-    timeseries_url = TIMESERIES_URL + "&stids=#{stations_string}"
-    timeseries_24 = timeseries_url + "&end=#{start_time}&start=#{back_24}"
-    timeseries_48 = timeseries_url + "&end=#{start_time}&start=#{back_48}"
-    timeseries_72 = timeseries_url + "&end=#{start_time}&start=#{back_72}"
-
-    timeseries_24_json = JSON.parse(HTTParty.get(timeseries_24, format: :plain))
-    timeseries_48_json = JSON.parse(HTTParty.get(timeseries_48, format: :plain))
-    timeseries_72_json = JSON.parse(HTTParty.get(timeseries_72, format: :plain))
-
     @stations.each do |station|
       data_24 = stats_24_json["STATION"].find { |hash| hash["STID"].upcase == station.stid.upcase}
       data_48 = stats_48_json["STATION"].find { |hash| hash["STID"].upcase == station.stid.upcase}
@@ -195,10 +186,41 @@ class StationsController < ApplicationController
     redirect_to action: 'index'
   end
 
+
+  def timeseries
+
+    station_id = timeseries_params[:station_id]
+    station = Station.find(station_id)
+    timeseries_url = TIMESERIES_URL + "&stids=#{station.stid}"
+
+    now = DateTime.now.utc
+    end_time = now.strftime("%Y%m%d%H%M")
+    days_back = timeseries_params[:days_back]
+    start_time = (now - days_back.to_i.days).strftime("%Y%m%d%H%M")
+    timeseries_url = timeseries_url + "&end=#{end_time}&start=#{start_time}"
+
+    timeseries_json = JSON.parse(HTTParty.get(timeseries_url, format: :plain))
+
+    data = []
+
+    timeseries_json["STATION"][0]["OBSERVATIONS"]["date_time"].each_with_index do |date, index|
+      obj = {}
+      obj[:date_time] = date
+      obj[:temperature] = timeseries_json["STATION"][0]["OBSERVATIONS"]["air_temp_set_1"][index]
+      data.push(obj)
+    end
+
+    render json: data
+  end
+
   private
 
   def station_params
     params.require(:station).permit(:stid)
+  end
+
+  def timeseries_params
+    params.permit(:station_id, :days_back)
   end
 
   def dig_deep(hash, keys)

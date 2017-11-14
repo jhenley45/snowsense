@@ -74,8 +74,82 @@
 
     <% end %>
 
+    <h3>Graphs yo</h3>
 
+    <div id="temperature-chart"></div>
 
   </div>
 
 <% end %>
+
+<script>
+
+
+$(document).ready(function() {
+
+  $.ajax({
+     url: '/stations/2/timeseries',
+     data: {
+        format: 'json',
+        days_back: 1
+     },
+     dataType: 'json',
+     type: 'GET'
+  }).done(function(data) {
+        drawChart(data);
+  }).fail(function(error) {
+       console.log(error);
+  });
+
+  var drawChart = function(data) {
+
+    var tempData;
+    var tempCategories;
+
+    tempData        = data.map(function(datum) { return datum.temperature });
+    tempCategories  = data.map(function(datum) { return datum.date_time });
+
+    Highcharts.chart('temperature-chart', {
+        chart: {
+            type: 'line'
+        },
+        title: {
+            text: 'Monthly Average Temperature'
+        },
+        subtitle: {
+            text: 'Source: WorldClimate.com'
+        },
+        xAxis: {
+            categories: tempCategories,
+            labels: {
+                step: 10, // this will show every second label
+                rotation: 45
+            }
+        },
+        yAxis: {
+            title: {
+                text: 'Temperature (°F)'
+            }
+        },
+        tooltip: {
+            formatter: function() {
+                return 'The value for <b>' + this.x + '</b> is <b>' + this.y + '</b>, in series '+ this.series.name;
+            }
+        },
+        plotOptions: {
+            line: {
+
+            }
+        },
+        series: [{
+            name: 'Temperature',
+            data: tempData
+        }]
+    });
+
+  };
+
+});
+
+
+</script>

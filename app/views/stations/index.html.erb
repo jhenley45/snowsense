@@ -80,7 +80,7 @@
 
       <span></span>
 
-      <div id="temperature-chart-<%= station[:stid] %>"></div>
+      <div id="temperature-chart-<%= station[:stid] %>" class="loading-icon"></div>
 
     </div>
 
@@ -130,9 +130,11 @@ $(document).ready(function() {
     var tempCategories;
 
     tempData        = data.map(function(datum) { return datum.temperature });
-    tempCategories  = data.map(function(datum) { return datum.date_time });
+    tempCategories  = data.map(function(datum) { return new Date(datum.date_time).toLocaleString("en-US") });
 
     var element = 'temperature-chart-' + stid;
+
+    $('#' + element).removeClass('loading-icon')
 
     Highcharts.chart(element, {
         chart: {
@@ -147,7 +149,7 @@ $(document).ready(function() {
         xAxis: {
             categories: tempCategories,
             labels: {
-                step: 10, // this will show every second label
+                step: 10,
                 rotation: 45
             }
         },

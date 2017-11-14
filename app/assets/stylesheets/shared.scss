@@ -10,3 +10,9 @@
 .alert {
   margin-bottom: 0em !important;
 }
+
+.loading-icon {
+  min-height: 10em;
+  background: no-repeat center image_url("loading.svg");
+  width: 100%;
+}

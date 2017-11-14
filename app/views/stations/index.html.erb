@@ -91,6 +91,8 @@
 
       <div id="temperature-chart-<%= station[:stid] %>" class="temperature-chart loading-icon" data-stationId="<%= station[:id] %>"></div>
 
+      <div id="wind-chart-<%= station[:stid] %>" class="wind-chart loading-icon" data-stationId="<%= station[:id] %>"></div>
+
     </div>
 
   </div>
@@ -110,7 +112,8 @@ $(document).ready(function() {
 var stations;
 
 var onInitialChartLoad = function(data, station) {
-  drawChart(data, station.stid);
+  drawTempChart(data, station.stid);
+  drawWindChart(data, station.stid);
 };
 
 var getStationList = function() {
@@ -122,7 +125,7 @@ var getStationList = function() {
       stations = data;
 
       data.forEach(function(station) {
-        getChartData(station, 3, onInitialChartLoad);
+        getTimeSeriesData(station, 3, onInitialChartLoad);
       });
   }).fail(function(error) {
       console.log(error);
@@ -130,7 +133,7 @@ var getStationList = function() {
 };
 
 
-var getChartData = function(station, daysBack, onSuccess) {
+var getTimeSeriesData = function(station, daysBack, onSuccess) {
   var url = '/stations/' + station.id + '/timeseries';
   $.ajax({
      url: url,
@@ -141,6 +144,7 @@ var getChartData = function(station, daysBack, onSuccess) {
      dataType: 'json',
      type: 'GET'
   }).done(function(data) {
+    console.log(data)
       onSuccess(data, station)
   }).fail(function(error) {
       console.log(error);
@@ -149,7 +153,7 @@ var getChartData = function(station, daysBack, onSuccess) {
 
 
 
-var drawChart = function(data, stid) {
+var drawTempChart = function(data, stid) {
 
   var tempData;
   var tempCategories;
@@ -202,6 +206,59 @@ var drawChart = function(data, stid) {
 };
 
 
+var drawWindChart = function(data, stid) {
+
+  var windData;
+  var windCategories;
+
+  windData        = data.map(function(datum) { return datum.wind_speed });
+  windCategories  = data.map(function(datum) { return new Date(datum.date_time).toLocaleString("en-US") });
+
+  var element = 'wind-chart-' + stid;
+
+  $('#' + element).removeClass('loading-icon');
+
+  Highcharts.chart(element, {
+      chart: {
+          type: 'line'
+      },
+      title: {
+          text: 'Historical Wind Speed'
+      },
+      subtitle: {
+          text: 'Source: MesoWest'
+      },
+      xAxis: {
+          categories: windCategories,
+          labels: {
+              rotation: 45
+          },
+          minTickInterval: 10
+      },
+      yAxis: {
+          title: {
+              text: 'Wind Speed (mph)'
+          }
+      },
+      tooltip: {
+          formatter: function() {
+              return 'The wind speed on' + this.x + ' was <b>' + this.y + '</b> mph';
+          }
+      },
+      plotOptions: {
+          line: {
+
+          }
+      },
+      series: [{
+          name: 'Wind Speed (mph)',
+          data: windData
+      }]
+  });
+
+};
+
+
 var addDaysBackInputHandler = function() {
 
   var fetchTemperatureData = function(e) {
@@ -231,7 +288,7 @@ var addDaysBackInputHandler = function() {
       chart.hideLoading();
     };
 
-    getChartData(station, daysBack, onSuccess);
+    getTimeSeriesData(station, daysBack, onSuccess);
   };
 
   var handleInput = function(e) {

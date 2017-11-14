@@ -9,6 +9,7 @@ class StationsController < ApplicationController
   NEAREST_URL = "http://api.mesowest.net/v2/stations/nearesttime?&atttime=201711121200&units=ENGLISH&obtimezone=local&showemptystations=1&token=#{ENV['MESO_API_TOKEN']}"
 
   def index
+
     @new_station = Station.new
 
     @station_data = []
@@ -207,7 +208,8 @@ class StationsController < ApplicationController
     timeseries_json["STATION"][0]["OBSERVATIONS"]["date_time"].each_with_index do |date, index|
       obj = {}
       obj[:date_time] = date
-      obj[:temperature] = timeseries_json["STATION"][0]["OBSERVATIONS"]["air_temp_set_1"][index]
+      obj[:temperature] = dig_deep(timeseries_json["STATION"][0]["OBSERVATIONS"], ["air_temp_set_1", index])
+      obj[:wind_speed] = dig_deep(timeseries_json["STATION"][0]["OBSERVATIONS"], ["wind_speed_set_1", index])
       data.push(obj)
     end
 

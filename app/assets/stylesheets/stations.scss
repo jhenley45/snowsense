@@ -15,8 +15,26 @@
 
   .day-selector {
 
+    text-align: right;
+    float: right;
+
     .days-back {
       width: 40px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+
+    .change-days {
+      background-color: #336E7B;
+      padding: 4px 8px;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+
+      &:hover {
+        background-color: #03C9A9;
+      }
     }
 
   }

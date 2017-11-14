@@ -170,7 +170,7 @@ var drawTempChart = function(data, stid) {
           type: 'line'
       },
       title: {
-          text: 'Historical Temperature'
+          text: 'Recent Temperature'
       },
       subtitle: {
           text: 'Source: MesoWest'
@@ -185,7 +185,17 @@ var drawTempChart = function(data, stid) {
       yAxis: {
           title: {
               text: 'Temperature (°F)'
-          }
+          },
+          plotLines: [{
+            color: '#D91E18', // Color value
+            dashStyle: 'solid', // Style of the plot line. Default to solid
+            value: 32, // Value of where the line will appear
+            width: 1, // Width of the line
+            label: {
+              text: '32 °F', // Content of the label.
+              align: 'left', // Positioning of the label.
+            }
+          }]
       },
       tooltip: {
           formatter: function() {
@@ -227,7 +237,7 @@ var drawWindChart = function(data, stid) {
           type: 'line'
       },
       title: {
-          text: 'Historical Wind Speed'
+          text: 'Recent Wind Speed'
       },
       subtitle: {
           text: 'Source: MesoWest'
@@ -242,7 +252,17 @@ var drawWindChart = function(data, stid) {
       yAxis: {
           title: {
               text: 'Wind Speed (mph)'
-          }
+          },
+          plotLines: [{
+            color: '#D91E18', // Color value
+            dashStyle: 'solid', // Style of the plot line. Default to solid
+            value: 21, // Value of where the line will appear
+            width: 1, // Width of the line
+            label: {
+              text: 'Est. Transported Snow', // Content of the label.
+              align: 'left', // Positioning of the label.
+            }
+          }]
       },
       tooltip: {
           formatter: function() {

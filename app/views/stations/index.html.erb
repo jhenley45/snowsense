@@ -210,11 +210,15 @@ var drawWindChart = function(data, stid) {
 
   var windData;
   var windCategories;
+  var element = 'wind-chart-' + stid;
 
   windData        = data.map(function(datum) { return datum.wind_speed });
   windCategories  = data.map(function(datum) { return new Date(datum.date_time).toLocaleString("en-US") });
 
-  var element = 'wind-chart-' + stid;
+  if (isNullDataSet(windData)) {
+    addNoDataChart($('#' + element));
+    return;
+  }
 
   $('#' + element).removeClass('loading-icon');
 
@@ -321,14 +325,29 @@ var findStation = function(stationId) {
     return null; // The object was not found
 };
 
+var isNullDataSet = function(data) {
+  var isNull = true;
+  data.some(function(datum) {
+    if (datum !== null) isNull = false;
+    return;
+  });
+  return isNull;
+}
+
 var addError = function(text, $element) {
-  var span = $('<span class="error-message">' + text + '</span>');
-  $element.append(span);
+  var $span = $('<span class="error-message">' + text + '</span>');
+  $element.append($span);
+};
+
+var addNoDataChart = function($element) {
+  var $message = $('<div class="no-chart-data">Station does not provide this data</div>');
+  $element.append($message);
+  $element.removeClass('loading-icon');
 };
 
 var removeError = function($element) {
   var $errorMessage = $element.find('.error-message');
   if ($errorMessage.length > 0) $errorMessage.remove();
-}
+};
 
 </script>

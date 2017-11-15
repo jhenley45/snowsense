@@ -18,6 +18,13 @@
     text-align: right;
     float: right;
 
+    span {
+      padding: 12px;
+      background-color: #ECF0F1;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
     .days-back {
       width: 40px;
       border-radius: 5px;

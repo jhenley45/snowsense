@@ -230,6 +230,12 @@ class StationsController < ApplicationController
     render json: station_data
   end
 
+  def search
+    results = Station.where("name LIKE ?", "%#{search_params[:query]}%")
+
+    render json: results
+  end
+
 
   private
 
@@ -239,6 +245,10 @@ class StationsController < ApplicationController
 
   def timeseries_params
     params.permit(:station_id, :days_back)
+  end
+
+  def search_params
+    params.permit(:query)
   end
 
   def dig_deep(hash, keys)

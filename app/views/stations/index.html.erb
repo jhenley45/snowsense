@@ -1,9 +1,13 @@
 
 
-<%= form_for @new_station, url: {action: "create"} do |f| %>
+<!-- <%= form_for @new_station, url: {action: "create"} do |f| %>
   Station ID: <%= f.text_field :stid %>
   <%= f.submit "Add Station" %>
-<% end %>
+<% end %> -->
+
+<div id="the-basics">
+  <input class="typeahead" type="text" placeholder="Add new station...">
+</div>
 
 
 <div class="station">
@@ -27,7 +31,7 @@
             <th scope="row"><%= station.name %></th>
             <td><%= station.state %></td>
             <td><%= station.elevation %></td>
-            <td><%= link_to 'Remove', station, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+            <td><%= link_to 'Remove', station_path(station), method: :delete, data: { confirm: 'Are you sure?' } %></td>
           </tr>
 
         <% end %>
@@ -82,7 +86,7 @@
 
         <div class="day-selector col-md-4 pull-right">
           <span>Go back
-            <input class="days-back" placeholder="3"> days
+            <input class="days-back" value="3"> days
             <button class="change-days">GO</button>
           </span>
 
@@ -259,7 +263,7 @@ var drawWindChart = function(data, stid) {
             value: 21, // Value of where the line will appear
             width: 1, // Width of the line
             label: {
-              text: 'Est. Transported Snow', // Content of the label.
+              text: 'Est. Transported Snow Speed', // Content of the label.
               align: 'left', // Positioning of the label.
             }
           }]
@@ -369,5 +373,37 @@ var removeError = function($element) {
   var $errorMessage = $element.find('.error-message');
   if ($errorMessage.length > 0) $errorMessage.remove();
 };
+
+
+
+
+
+
+
+var stations = new Bloodhound({
+  datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
+  queryTokenizer: Bloodhound.tokenizers.whitespace,
+  remote: {
+    url: '/stations/search?query=%QUERY',
+    wildcard: '%QUERY'
+  }
+});
+
+
+$('#the-basics .typeahead').typeahead({
+  hint: true,
+  highlight: true,
+  minLength: 3,
+  displayKey: 'name',
+  templates: {
+        suggestion: function (station) {
+            return '<p>' + station.name + '</p>';
+        }
+    }
+},
+{
+  name: 'states',
+  source: stations
+});
 
 </script>

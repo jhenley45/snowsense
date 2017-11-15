@@ -391,19 +391,21 @@ var stations = new Bloodhound({
 
 
 $('#the-basics .typeahead').typeahead({
-  hint: true,
-  highlight: true,
-  minLength: 3,
-  displayKey: 'name',
-  templates: {
-        suggestion: function (station) {
-            return '<p>' + station.name + '</p>';
-        }
+    hint: true,
+    highlight: true,
+    minLength: 3,
+    displayKey: 'name',
+  },
+  {
+    name: 'states',
+    source: stations,
+    limit: 10,
+    templates: {
+    suggestion: function (station) {
+        return '<p>' + station.name + '</p>';
+      }
     }
-},
-{
-  name: 'states',
-  source: stations
-});
+  }
+);
 
 </script>

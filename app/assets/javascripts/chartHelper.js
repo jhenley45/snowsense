@@ -47,7 +47,7 @@ if (!snowSense) var snowSense = {};
               value: 21, // Value of where the line will appear
               width: 1, // Width of the line
               label: {
-                text: 'Est. Transported Snow Speed', // Content of the label.
+                //text: 'Est. Transported Snow Speed', // Content of the label.
                 align: 'left', // Positioning of the label.
               },
               zIndex: 5
@@ -84,7 +84,16 @@ if (!snowSense) var snowSense = {};
                 lineWidthPlus: 0
               }
             }
-          }]
+          },
+          {
+              name: '',
+              type: 'scatter',
+              marker: {
+                enabled: false
+              },
+              data: [21]
+           }
+         ]
     });
 
   }
@@ -148,7 +157,7 @@ if (!snowSense) var snowSense = {};
             data: tempData
         },
         {
-            name: 'Goal',
+            name: '',
             type: 'scatter',
             marker: {
               enabled: false

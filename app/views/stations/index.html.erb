@@ -80,7 +80,7 @@
 
     <section class="charts">
 
-      <div class="row">
+      <div class="row chart-block">
         <div class="col-md-4">
           <h3>Temperature</h3>
         </div>
@@ -88,15 +88,15 @@
         <div class="day-selector col-md-4 pull-right">
           <span>Go back
             <input class="days-back"> days
-            <button class="change-days">GO</button>
+            <button class="change-days" data-chartType="temperature">GO</button>
           </span>
 
         </div>
-        <div id="temperature-chart-<%= station[:stid] %>" class="temperature-chart loading-icon" data-stationId="<%= station[:id] %>"></div>
+        <div id="temperature-chart-<%= station[:stid] %>" class="temperature-chart chart loading-icon" data-stationId="<%= station[:id] %>"></div>
       </div>
 
 
-      <div class="row">
+      <div class="row chart-block">
         <div class="col-md-4">
           <h3>Wind</h3>
         </div>
@@ -104,11 +104,11 @@
         <div class="day-selector col-md-4 pull-right">
           <span>Go back
             <input class="days-back"> days
-            <button class="change-days">GO</button>
+            <button class="change-days" data-chartType="wind">GO</button>
           </span>
 
         </div>
-        <div id="wind-chart-<%= station[:stid] %>" class="wind-chart loading-icon" data-stationId="<%= station[:id] %>"></div>
+        <div id="wind-chart-<%= station[:stid] %>" class="wind-chart chart loading-icon" data-stationId="<%= station[:id] %>"></div>
       </div>
 
     </section>
@@ -123,9 +123,9 @@
 // Show wind direction on wind graph
 // Mark times when faceting could occur on temp graph
 
+// Hook wind chart up to daysBack
 
 // Add new chart click handler
-// Hook wind chart up to daysBack
 // Add wind direction to wind chart
 // Add toggle on/off of series
 // Hide wind if over X days
@@ -141,6 +141,7 @@ $(document).ready(function() {
 
 var stations;
 var defaultDaysBack = 3;
+var windGustDayLimit = 6;
 
 var onInitialChartLoad = function(data, station) {
   snowSense.chartHelper.drawTempChart(data, station.stid);
@@ -191,15 +192,59 @@ var addDefaultDaysBack = function() {
 
 var addDaysBackInputHandler = function() {
 
-  var fetchTemperatureData = function(e) {
+  var fetchData = function(e) {
     var $target     = $(e.target);
-    var $charts     = $target.closest('.charts');
-    var $chartDiv   = $charts.find('.temperature-chart');
-    var daysBack    = $charts.find('.days-back').val();
-    var stationId   = $chartDiv.attr('data-stationId');
+    var $chartBlock = $target.closest('.chart-block');
+    var $chart      = $chartBlock.find('.chart');
+    var daysBack    = $chartBlock.find('.days-back').val();
+    var stationId   = $chart.attr('data-stationId');
     var station     = findStation(parseInt(stationId));
+    var chartType   = $target.attr('data-chartType');
 
-    var chart = $chartDiv.highcharts();
+    if (chartType === 'temperature') fetchTemperatureData(station, daysBack, $chart);
+    else if (chartType === 'wind') fetchWindData(station, daysBack, $chart);
+  };
+
+  var fetchWindData = function(station, daysBack, $chart) {
+
+    var chart = $chart.highcharts();
+    snowSense.chartHelper.removeAllSeries(chart);
+    chart.showLoading();
+
+    var onSuccess = function(data, station) {
+      var windData        = data.map(function(datum) { return datum.wind_speed });
+      var windCategories  = data.map(function(datum) { return new Date(datum.date_time).toLocaleString("en-US") });
+      var windGustData    = data.map(function(datum) { return datum.wind_gusts });
+      var windSeries      = {
+                  name: "Wind Gusts (mph)",
+                  data: windGustData,
+                  lineWidth: 0,
+                  marker: {
+                    enabled: true,
+                    radius: 2
+                  },
+                  tooltip: {
+                    valueDecimals: 2
+                  },
+                  states: {
+                    hover: {
+                      lineWidthPlus: 0
+                    }
+                  }
+                }
+
+      chart.addSeries({ data: windData });
+      if (daysBack < windGustDayLimit) chart.addSeries(windSeries);
+      chart.xAxis[0].setCategories(windCategories);
+      chart.hideLoading();
+    };
+
+    getTimeSeriesData(station, daysBack, onSuccess);
+  };
+
+  var fetchTemperatureData = function(station, daysBack, $chart) {
+
+    var chart = $chart.highcharts();
     snowSense.chartHelper.removeAllSeries(chart);
     chart.showLoading();
 
@@ -231,7 +276,7 @@ var addDaysBackInputHandler = function() {
     }
 
     if (error) addError(error, $selector);
-    else fetchTemperatureData(e);
+    else fetchData(e);
   };
 
   $('.change-days').click(handleInput);

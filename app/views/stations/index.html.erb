@@ -5,7 +5,7 @@
   <%= f.submit "Add Station" %>
 <% end %> -->
 
-<div id="the-basics">
+<div id="new-station">
   <input class="typeahead" type="text" placeholder="Add new station...">
 </div>
 
@@ -78,10 +78,11 @@
 
     <% end %>
 
-    <div class="charts">
+    <section class="charts">
+
       <div class="row">
         <div class="col-md-4">
-          <h3>Graphs yo</h3>
+          <h3>Temperature</h3>
         </div>
 
         <div class="day-selector col-md-4 pull-right">
@@ -91,13 +92,26 @@
           </span>
 
         </div>
+        <div id="temperature-chart-<%= station[:stid] %>" class="temperature-chart loading-icon" data-stationId="<%= station[:id] %>"></div>
       </div>
 
-      <div id="temperature-chart-<%= station[:stid] %>" class="temperature-chart loading-icon" data-stationId="<%= station[:id] %>"></div>
 
-      <div id="wind-chart-<%= station[:stid] %>" class="wind-chart loading-icon" data-stationId="<%= station[:id] %>"></div>
+      <div class="row">
+        <div class="col-md-4">
+          <h3>Temperature</h3>
+        </div>
 
-    </div>
+        <div class="day-selector col-md-4 pull-right">
+          <span>Go back
+            <input class="days-back" value="3"> days
+            <button class="change-days">GO</button>
+          </span>
+
+        </div>
+        <div id="wind-chart-<%= station[:stid] %>" class="wind-chart loading-icon" data-stationId="<%= station[:id] %>"></div>
+      </div>
+
+    </section>
 
   </div>
 
@@ -105,6 +119,17 @@
 
 <script>
 
+
+// Show wind direction on wind graph
+// Mark times when faceting could occur on temp graph
+
+
+// Add new chart click handler
+// Hook wind chart up to daysBack
+// Add wind direction to wind chart
+// Add toggle on/off of series
+// Hide wind if over X days
+// refactor out AJAX
 
 $(document).ready(function() {
 
@@ -116,8 +141,8 @@ $(document).ready(function() {
 var stations;
 
 var onInitialChartLoad = function(data, station) {
-  drawTempChart(data, station.stid);
-  drawWindChart(data, station.stid);
+  snowSense.chartHelper.drawTempChart(data, station.stid);
+  snowSense.chartHelper.drawWindChart(data, station.stid);
 };
 
 var getStationList = function() {
@@ -127,9 +152,10 @@ var getStationList = function() {
      type: 'GET'
   }).done(function(data) {
       stations = data;
+      var daysBack = 3;
 
       data.forEach(function(station) {
-        getTimeSeriesData(station, 3, onInitialChartLoad);
+        getTimeSeriesData(station, daysBack, onInitialChartLoad);
       });
   }).fail(function(error) {
       console.log(error);
@@ -148,142 +174,10 @@ var getTimeSeriesData = function(station, daysBack, onSuccess) {
      dataType: 'json',
      type: 'GET'
   }).done(function(data) {
-    console.log(data)
       onSuccess(data, station)
   }).fail(function(error) {
       console.log(error);
   });
-};
-
-
-
-var drawTempChart = function(data, stid) {
-
-  var tempData;
-  var tempCategories;
-
-  tempData        = data.map(function(datum) { return datum.temperature });
-  tempCategories  = data.map(function(datum) { return new Date(datum.date_time).toLocaleString("en-US") });
-
-  var element = 'temperature-chart-' + stid;
-
-  $('#' + element).removeClass('loading-icon');
-
-  Highcharts.chart(element, {
-      chart: {
-          type: 'line'
-      },
-      title: {
-          text: 'Recent Temperature'
-      },
-      subtitle: {
-          text: 'Source: MesoWest'
-      },
-      xAxis: {
-          categories: tempCategories,
-          labels: {
-              rotation: 45
-          },
-          minTickInterval: 10
-      },
-      yAxis: {
-          title: {
-              text: 'Temperature (°F)'
-          },
-          plotLines: [{
-            color: '#D91E18', // Color value
-            dashStyle: 'solid', // Style of the plot line. Default to solid
-            value: 32, // Value of where the line will appear
-            width: 1, // Width of the line
-            label: {
-              text: '32 °F', // Content of the label.
-              align: 'left', // Positioning of the label.
-            }
-          }]
-      },
-      tooltip: {
-          formatter: function() {
-              return 'The temperature on' + this.x + ' was <b>' + this.y + '</b> degrees Farenheit';
-          }
-      },
-      plotOptions: {
-          line: {
-
-          }
-      },
-      series: [{
-          name: 'Temperature (°F)',
-          data: tempData
-      }]
-  });
-
-};
-
-
-var drawWindChart = function(data, stid) {
-
-  var windData;
-  var windCategories;
-  var element = 'wind-chart-' + stid;
-
-  windData        = data.map(function(datum) { return datum.wind_speed });
-  windCategories  = data.map(function(datum) { return new Date(datum.date_time).toLocaleString("en-US") });
-
-  if (isNullDataSet(windData)) {
-    addNoDataChart($('#' + element));
-    return;
-  }
-
-  $('#' + element).removeClass('loading-icon');
-
-  Highcharts.chart(element, {
-      chart: {
-          type: 'line'
-      },
-      title: {
-          text: 'Recent Wind Speed'
-      },
-      subtitle: {
-          text: 'Source: MesoWest'
-      },
-      xAxis: {
-          categories: windCategories,
-          labels: {
-              rotation: 45
-          },
-          minTickInterval: 10
-      },
-      yAxis: {
-          title: {
-              text: 'Wind Speed (mph)'
-          },
-          plotLines: [{
-            color: '#D91E18', // Color value
-            dashStyle: 'solid', // Style of the plot line. Default to solid
-            value: 21, // Value of where the line will appear
-            width: 1, // Width of the line
-            label: {
-              text: 'Est. Transported Snow Speed', // Content of the label.
-              align: 'left', // Positioning of the label.
-            }
-          }]
-      },
-      tooltip: {
-          formatter: function() {
-              return 'The wind speed on' + this.x + ' was <b>' + this.y + '</b> mph';
-          }
-      },
-      plotOptions: {
-          line: {
-
-          }
-      },
-      series: [{
-          name: 'Wind Speed (mph)',
-          data: windData
-      }]
-  });
-
 };
 
 
@@ -298,20 +192,14 @@ var addDaysBackInputHandler = function() {
     var station     = findStation(parseInt(stationId));
 
     var chart = $chartDiv.highcharts();
-    var seriesLength = chart.series.length;
-    for (var i = seriesLength -1; i > -1; i--) {
-        chart.series[i].remove();
-    };
+    snowSense.chartHelper.removeAllSeries(chart);
     chart.showLoading();
 
     var onSuccess = function(data, station) {
       var tempData        = data.map(function(datum) { return datum.temperature });
       var tempCategories  = data.map(function(datum) { return new Date(datum.date_time).toLocaleString("en-US") });
 
-      chart.addSeries({
-        data: tempData
-      });
-
+      chart.addSeries({ data: tempData });
       chart.xAxis[0].setCategories(tempCategories);
       chart.hideLoading();
     };
@@ -343,41 +231,22 @@ var addDaysBackInputHandler = function() {
 
 var findStation = function(stationId) {
     for (var i = 0, len = stations.length; i < len; i++) {
-        if (stations[i].id === stationId)
-            return stations[i]; // Return as soon as the object is found
+        if (stations[i].id === stationId) return stations[i]; // Return as soon as the object is found
     }
     return null; // The object was not found
 };
 
-var isNullDataSet = function(data) {
-  var isNull = true;
-  data.some(function(datum) {
-    if (datum !== null) isNull = false;
-    return;
-  });
-  return isNull;
-}
 
 var addError = function(text, $element) {
   var $span = $('<span class="error-message">' + text + '</span>');
   $element.append($span);
 };
 
-var addNoDataChart = function($element) {
-  var $message = $('<div class="no-chart-data">Station does not provide this data</div>');
-  $element.append($message);
-  $element.removeClass('loading-icon');
-};
 
 var removeError = function($element) {
   var $errorMessage = $element.find('.error-message');
   if ($errorMessage.length > 0) $errorMessage.remove();
 };
-
-
-
-
-
 
 
 var stations = new Bloodhound({
@@ -390,7 +259,7 @@ var stations = new Bloodhound({
 });
 
 
-$('#the-basics .typeahead').typeahead({
+$('#new-station .typeahead').typeahead({
     hint: true,
     highlight: true,
     minLength: 3,

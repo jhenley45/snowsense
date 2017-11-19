@@ -210,6 +210,7 @@ class StationsController < ApplicationController
       obj[:date_time] = date
       obj[:temperature] = dig_deep(timeseries_json["STATION"][0]["OBSERVATIONS"], ["air_temp_set_1", index])
       obj[:wind_speed] = dig_deep(timeseries_json["STATION"][0]["OBSERVATIONS"], ["wind_speed_set_1", index])
+      obj[:wind_gusts] = dig_deep(timeseries_json["STATION"][0]["OBSERVATIONS"], ["wind_gust_set_1", index])
       data.push(obj)
     end
 

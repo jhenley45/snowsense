@@ -64,29 +64,8 @@ if (!snowSense) var snowSense = {};
             }
         },
         series: [
-          {
-            id: 'windSpeed',
-            name: 'Wind Speed (mph)',
-            data: windSpeedData
-          },
-          {
-            id: 'windGust',
-            name: "Wind Gusts (mph)",
-            data: windGustData,
-            lineWidth: 0,
-            marker: {
-              enabled: true,
-              radius: 2
-            },
-            tooltip: {
-              valueDecimals: 2
-            },
-            states: {
-              hover: {
-                lineWidthPlus: 0
-              }
-            }
-          },
+          createWindSpeedSeries(windSpeedData),
+          createWindGustSeries(windGustData),
           {
               name: '',
               type: 'scatter',
@@ -178,15 +157,25 @@ if (!snowSense) var snowSense = {};
     };
   }
 
+  function addWindGustSeries(chart, data) {
+    var windGustSeries = createWindGustSeries(data);
+    chart.addSeries(windGustSeries);
+  }
+
+  function addWindSpeedSeries(chart, data) {
+    var windSpeedData = createWindSpeedSeries(data);
+    chart.addSeries(windSpeedData);
+  }
+
 
   // ---------- PRIVATE FUNCTIONS ----------
 
   function addNoDataChart($element) {
-    var $message = $('<div class="no-chart-data">Station does not provide this data</div>');
-    $element.append($message);
-    $element.removeClass('loading-icon');
+    var chartBlock   = $element.closest('.chart-block');
+    chartBlock.empty();
   };
 
+  // TODO change this so that it checks to see if ALL data is null, not just one piece.
   function isNullDataSet(data) {
     var isNull = true;
     data.some(function(datum) {
@@ -196,11 +185,42 @@ if (!snowSense) var snowSense = {};
     return isNull;
   }
 
+  function createWindGustSeries(data) {
+    return {
+      id: 'windGust',
+      name: "Wind Gusts (mph)",
+      data: data,
+      lineWidth: 0,
+      marker: {
+        enabled: true,
+        radius: 2
+      },
+      tooltip: {
+        valueDecimals: 2
+      },
+      states: {
+        hover: {
+          lineWidthPlus: 0
+        }
+      }
+    }
+  }
+
+  function createWindSpeedSeries(data) {
+    return {
+      id: 'windSpeed',
+      name: 'Wind Speed (mph)',
+      data: data
+    }
+  }
+
 
   snowSense.chartHelper = {
     drawWindChart:          drawWindChart,
     drawTempChart:          drawTempChart,
-    removeAllSeries:        removeAllSeries
+    removeAllSeries:        removeAllSeries,
+    addWindGustSeries:      addWindGustSeries,
+    addWindSpeedSeries:     addWindSpeedSeries
   };
 
 }());

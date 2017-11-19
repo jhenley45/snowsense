@@ -216,29 +216,12 @@ var addDaysBackInputHandler = function() {
     chart.showLoading();
 
     var onSuccess = function(data, station) {
-      var windData        = data.map(function(datum) { return datum.wind_speed });
+      var windSpeedData   = data.map(function(datum) { return datum.wind_speed });
       var windCategories  = data.map(function(datum) { return new Date(datum.date_time).toLocaleString("en-US") });
       var windGustData    = data.map(function(datum) { return datum.wind_gusts });
-      var windSeries      = {
-                  name: "Wind Gusts (mph)",
-                  data: windGustData,
-                  lineWidth: 0,
-                  marker: {
-                    enabled: true,
-                    radius: 2
-                  },
-                  tooltip: {
-                    valueDecimals: 2
-                  },
-                  states: {
-                    hover: {
-                      lineWidthPlus: 0
-                    }
-                  }
-                }
 
-      chart.addSeries({ data: windData });
-      if (daysBack < windGustDayLimit) chart.addSeries(windSeries);
+      snowSense.chartHelper.addWindSpeedSeries(chart, windSpeedData);
+      snowSense.chartHelper.addWindGustSeries(chart, windGustData);
       chart.xAxis[0].setCategories(windCategories);
       chart.hideLoading();
     };

@@ -9,7 +9,6 @@ class StationsController < ApplicationController
   NEAREST_URL = "http://api.mesowest.net/v2/stations/nearesttime?&atttime=201711121200&units=ENGLISH&obtimezone=local&showemptystations=1&token=#{ENV['MESO_API_TOKEN']}"
 
   def index
-
     @new_station = Station.new
 
     @station_data = []
@@ -175,7 +174,10 @@ class StationsController < ApplicationController
 
     end
 
-    redirect_to action: 'index'
+    station = existing_station ? existing_station : new_station
+
+    render :json => station
+    # redirect_to action: 'index'
   end
 
   def destroy

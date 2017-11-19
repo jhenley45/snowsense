@@ -125,14 +125,14 @@
 <script>
 
 
-// Show wind direction on wind graph
-// Mark times when faceting could occur on temp graph
 
 
-// Add new chart click handler
+
 // Add wind direction to wind chart
-// Add toggle on/off of series
 // refactor out AJAX
+// Mark times when faceting could occur on temp graph
+// Allow user to create nickname for station
+// Add ability to order stations w drag and drop
 
 $(document).ready(function() {
 
@@ -205,8 +205,8 @@ var addDaysBackInputHandler = function() {
     var station     = findStation(parseInt(stationId));
     var chartType   = $target.attr('data-chartType');
 
-    if (chartType === 'temperature') fetchTemperatureData(station, daysBack, $chart);
-    else if (chartType === 'wind') fetchWindData(station, daysBack, $chart);
+    if (chartType === 'temperature')    fetchTemperatureData(station, daysBack, $chart);
+    else if (chartType === 'wind')      fetchWindData(station, daysBack, $chart);
   };
 
   var fetchWindData = function(station, daysBack, $chart) {
@@ -338,5 +338,22 @@ $('#new-station .typeahead').typeahead({
     }
   }
 );
+
+var addUserStation = function(stid) {
+  $.ajax({
+     url: '/stations',
+     dataType: 'html',
+     data: { station: { stid: stid } },
+     type: 'POST'
+  }).done(function(data) {
+      location.reload();      // station added, reload page to get new data
+  }).fail(function(error) {
+      console.log(error);
+  });
+};
+
+$('.typeahead').on('typeahead:selected', function(evt, item) {
+    addUserStation(item.stid);
+})
 
 </script>

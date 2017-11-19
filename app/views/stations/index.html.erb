@@ -101,6 +101,11 @@
           <h3>Wind</h3>
         </div>
 
+        <div class="col-md-4 toggle-buttons">
+          <button class="toggle-button active" data-seriesId="windGust">Gusts</button>
+          <button class="toggle-button active" data-seriesId="windSpeed">Wind</button>
+        </div>
+
         <div class="day-selector col-md-4 pull-right">
           <span>Go back
             <input class="days-back"> days
@@ -123,12 +128,10 @@
 // Show wind direction on wind graph
 // Mark times when faceting could occur on temp graph
 
-// Hook wind chart up to daysBack
 
 // Add new chart click handler
 // Add wind direction to wind chart
 // Add toggle on/off of series
-// Hide wind if over X days
 // refactor out AJAX
 
 $(document).ready(function() {
@@ -136,6 +139,7 @@ $(document).ready(function() {
   getStationList();
   addDaysBackInputHandler();
   addDefaultDaysBack();
+  addToggleSeriesHandler();
 
 });
 
@@ -281,6 +285,28 @@ var addDaysBackInputHandler = function() {
 
   $('.change-days').click(handleInput);
 };
+
+var addToggleSeriesHandler = function() {
+
+  var onClick = function(e) {
+    var $target     = $(e.target);
+    var $chartBlock = $target.closest('.chart-block');
+    var $chart      = $chartBlock.find('.chart');
+    var seriesId    = $target.attr('data-seriesId');
+    var chart       = $chart.highcharts();
+    var series      = chart.get(seriesId);
+
+    if ($target.hasClass('active')) {
+      $target.removeClass('active');
+      series.hide();
+    } else {
+      $target.addClass('active');
+      series.show();
+    }
+  };
+
+  $('.toggle-button').click(onClick);
+}
 
 var findStation = function(stationId) {
     for (var i = 0, len = stations.length; i < len; i++) {

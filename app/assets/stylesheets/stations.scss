@@ -13,6 +13,29 @@
     text-align: center;
   }
 
+  .toggle-buttons {
+    padding: 12px;
+    background-color: #ECF0F1;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+
+    .toggle-button {
+      background-color: #336E7B;
+      padding: 4px 8px;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      opacity: 0.6;
+
+      &.active {
+        opacity: 1;
+      }
+    }
+    
+  }
+
+
+
   .day-selector {
 
     text-align: right;

@@ -65,10 +65,12 @@ if (!snowSense) var snowSense = {};
         },
         series: [
           {
+            id: 'windSpeed',
             name: 'Wind Speed (mph)',
             data: windSpeedData
           },
           {
+            id: 'windGust',
             name: "Wind Gusts (mph)",
             data: windGustData,
             lineWidth: 0,
@@ -153,6 +155,7 @@ if (!snowSense) var snowSense = {};
             }
         },
         series: [{
+            id: 'temperature',
             name: 'Temperature (°F)',
             data: tempData
         },

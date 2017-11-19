@@ -87,7 +87,7 @@
 
         <div class="day-selector col-md-4 pull-right">
           <span>Go back
-            <input class="days-back" value="3"> days
+            <input class="days-back"> days
             <button class="change-days">GO</button>
           </span>
 
@@ -98,12 +98,12 @@
 
       <div class="row">
         <div class="col-md-4">
-          <h3>Temperature</h3>
+          <h3>Wind</h3>
         </div>
 
         <div class="day-selector col-md-4 pull-right">
           <span>Go back
-            <input class="days-back" value="3"> days
+            <input class="days-back"> days
             <button class="change-days">GO</button>
           </span>
 
@@ -135,10 +135,12 @@ $(document).ready(function() {
 
   getStationList();
   addDaysBackInputHandler();
+  addDefaultDaysBack();
 
 });
 
 var stations;
+var defaultDaysBack = 3;
 
 var onInitialChartLoad = function(data, station) {
   snowSense.chartHelper.drawTempChart(data, station.stid);
@@ -152,10 +154,9 @@ var getStationList = function() {
      type: 'GET'
   }).done(function(data) {
       stations = data;
-      var daysBack = 3;
 
       data.forEach(function(station) {
-        getTimeSeriesData(station, daysBack, onInitialChartLoad);
+        getTimeSeriesData(station, defaultDaysBack, onInitialChartLoad);
       });
   }).fail(function(error) {
       console.log(error);
@@ -180,6 +181,13 @@ var getTimeSeriesData = function(station, daysBack, onSuccess) {
   });
 };
 
+
+var addDefaultDaysBack = function() {
+
+  var inputs = $('.day-selector input');
+  inputs.val(defaultDaysBack);
+
+};
 
 var addDaysBackInputHandler = function() {
 

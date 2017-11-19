@@ -49,7 +49,8 @@ if (!snowSense) var snowSense = {};
               label: {
                 text: 'Est. Transported Snow Speed', // Content of the label.
                 align: 'left', // Positioning of the label.
-              }
+              },
+              zIndex: 5
             }]
         },
         tooltip: {
@@ -145,7 +146,15 @@ if (!snowSense) var snowSense = {};
         series: [{
             name: 'Temperature (°F)',
             data: tempData
-        }]
+        },
+        {
+            name: 'Goal',
+            type: 'scatter',
+            marker: {
+              enabled: false
+            },
+            data: [32]
+         }]
     });
 
   }

@@ -13,10 +13,7 @@ if (!snowSense) var snowSense = {};
     windCategories    = data.map(function(datum) { return new Date(datum.date_time).toLocaleString("en-US") });
     windGustData      = data.map(function(datum) { return datum.wind_gusts });
 
-    var chartMax      = Math.max.apply(null, windGustData);
-    var windDirectionSeriesValue = chartMax + 5;
-
-    var windDirectionData = createWindDirectionData(data, windSpeedData.length, windDirectionSeriesValue);
+    var windDirectionData = createWindDirectionData(data);
 
     if (isNullDataSet(windSpeedData)) {
       addNoDataChart($('#' + element));
@@ -173,6 +170,12 @@ if (!snowSense) var snowSense = {};
     chart.addSeries(windSpeedData);
   }
 
+  function addWindDirectionSeries(chart, data) {
+    var windDirectionData = createWindDirectionData(data);
+    var windDirectionSeries = createWindDirectionSeries(windDirectionData);
+    chart.addSeries(windDirectionSeries);
+  }
+
 
   // ---------- PRIVATE FUNCTIONS ----------
 
@@ -228,10 +231,15 @@ if (!snowSense) var snowSense = {};
     }
   }
 
-  function createWindDirectionData(data, length, max) {
+  function createWindDirectionData(data) {
+    var windGustData      = data.map(function(datum) { return datum.wind_gusts });
+    var chartMax      = Math.max.apply(null, windGustData);
+    var windDirectionSeriesValue = chartMax + 5;
+
 
     var createNullDataSet = function(length) {
-      var half = Math.round(length / 2) - 1;
+      var half = Math.round(length / 2);
+      if (half > length / 2) half = half - 1;
       var array = [];
 
       for (j = 0; j < half; j ++) {
@@ -241,7 +249,7 @@ if (!snowSense) var snowSense = {};
     };
 
     var windData = [];
-    var dataGroupSize = Math.round(length / 10);
+    var dataGroupSize = Math.round(windGustData.length / 10);
     var startIndex = 0;
     var endIndex = dataGroupSize;
 
@@ -255,7 +263,7 @@ if (!snowSense) var snowSense = {};
       var currentGroup = data.slice(startIndex, endIndex);
 
       //var direction = getPrevailingWindDirection(currentGroup);
-      var direction = max;//'SSW';
+      var direction = windDirectionSeriesValue;//'SSW';
 
       var nullDataSet = createNullDataSet(dataGroupSize);
       var thisDataSet = [];
@@ -276,7 +284,8 @@ if (!snowSense) var snowSense = {};
     drawTempChart:          drawTempChart,
     removeAllSeries:        removeAllSeries,
     addWindGustSeries:      addWindGustSeries,
-    addWindSpeedSeries:     addWindSpeedSeries
+    addWindSpeedSeries:     addWindSpeedSeries,
+    addWindDirectionSeries: addWindDirectionSeries
   };
 
 }());

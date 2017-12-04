@@ -225,6 +225,7 @@ var addDaysBackInputHandler = function() {
 
       snowSense.chartHelper.addWindSpeedSeries(chart, windSpeedData);
       snowSense.chartHelper.addWindGustSeries(chart, windGustData);
+      snowSense.chartHelper.addWindDirectionSeries(chart, data);
       chart.xAxis[0].setCategories(windCategories);
       chart.hideLoading();
     };

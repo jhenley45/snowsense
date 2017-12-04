@@ -213,6 +213,7 @@ class StationsController < ApplicationController
       obj[:temperature] = dig_deep(timeseries_json["STATION"][0]["OBSERVATIONS"], ["air_temp_set_1", index])
       obj[:wind_speed] = dig_deep(timeseries_json["STATION"][0]["OBSERVATIONS"], ["wind_speed_set_1", index])
       obj[:wind_gusts] = dig_deep(timeseries_json["STATION"][0]["OBSERVATIONS"], ["wind_gust_set_1", index])
+      obj[:wind_directions] = dig_deep(timeseries_json["STATION"][0]["OBSERVATIONS"], ["wind_cardinal_direction_set_1d", index])
       data.push(obj)
     end
 

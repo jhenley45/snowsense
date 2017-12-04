@@ -133,6 +133,9 @@
 // Mark times when faceting could occur on temp graph
 // Allow user to create nickname for station
 // Add ability to order stations w drag and drop
+// Ensure data point only every 15 minutes
+// Rm decimals from charts
+// Precipitation density graph
 
 $(document).ready(function() {
 
@@ -353,7 +356,8 @@ var addUserStation = function(stid) {
 };
 
 $('.typeahead').on('typeahead:selected', function(evt, item) {
-    addUserStation(item.stid);
+  $('.typeahead').typeahead('val', '');
+  addUserStation(item.stid);
 })
 
 </script>

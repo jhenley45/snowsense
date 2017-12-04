@@ -6,12 +6,17 @@ if (!snowSense) var snowSense = {};
 
     var windSpeedData;
     var windCategories;
+    var windGustData;
     var element = 'wind-chart-' + stid;
 
     windSpeedData     = data.map(function(datum) { return datum.wind_speed });
     windCategories    = data.map(function(datum) { return new Date(datum.date_time).toLocaleString("en-US") });
     windGustData      = data.map(function(datum) { return datum.wind_gusts });
 
+    var chartMax      = Math.max.apply(null, windGustData);
+    var windDirectionSeriesValue = chartMax + 5;
+
+    var windDirectionData = createWindDirectionData(data, windSpeedData.length, windDirectionSeriesValue);
 
     if (isNullDataSet(windSpeedData)) {
       addNoDataChart($('#' + element));
@@ -35,7 +40,7 @@ if (!snowSense) var snowSense = {};
             labels: {
                 rotation: 45
             },
-            minTickInterval: 10
+            minTickInterval: 20
         },
         yAxis: {
             title: {
@@ -66,6 +71,7 @@ if (!snowSense) var snowSense = {};
         series: [
           createWindSpeedSeries(windSpeedData),
           createWindGustSeries(windGustData),
+          createWindDirectionSeries(windDirectionData),
           {
               name: '',
               type: 'scatter',
@@ -212,6 +218,56 @@ if (!snowSense) var snowSense = {};
       name: 'Wind Speed (mph)',
       data: data
     }
+  }
+
+  function createWindDirectionSeries(data) {
+    return {
+      id: 'windDirection',
+      name: 'Wind Direction',
+      data: data
+    }
+  }
+
+  function createWindDirectionData(data, length, max) {
+
+    var createNullDataSet = function(length) {
+      var half = Math.round(length / 2) - 1;
+      var array = [];
+
+      for (j = 0; j < half; j ++) {
+        array.push(null);
+      }
+      return array;
+    };
+
+    var windData = [];
+    var dataGroupSize = Math.round(length / 10);
+    var startIndex = 0;
+    var endIndex = dataGroupSize;
+
+    for (i = 0; i < 10; i++) {
+      if (i > 0) startIndex += dataGroupSize;
+      if (i > 0) startIndex += 1;
+      endIndex    = startIndex + dataGroupSize;
+
+      if (i === 9) endIndex = data.length - 1;
+
+      var currentGroup = data.slice(startIndex, endIndex);
+
+      //var direction = getPrevailingWindDirection(currentGroup);
+      var direction = max;//'SSW';
+
+      var nullDataSet = createNullDataSet(dataGroupSize);
+      var thisDataSet = [];
+      thisDataSet = thisDataSet.concat(nullDataSet);
+      thisDataSet.push(direction);
+      thisDataSet = thisDataSet.concat(nullDataSet);
+
+      if (thisDataSet.length > dataGroupSize) thisDataSet.pop();
+      windData = windData.concat(thisDataSet);
+    }
+
+    return windData;
   }
 
 

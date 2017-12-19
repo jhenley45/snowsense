@@ -57,7 +57,12 @@ if (!snowSense) var snowSense = {};
         },
         tooltip: {
             formatter: function() {
+              if (this.point.direction) {
+                return 'Prevailing Wind: <b>' + this.point.direction + '</b>';
+              } else {
                 return '' + this.series.name + ' on' + this.x + ' was <b>' + this.y + '</b> mph';
+              }
+
             }
         },
         plotOptions: {
@@ -227,15 +232,19 @@ if (!snowSense) var snowSense = {};
     return {
       id: 'windDirection',
       name: 'Wind Direction',
-      data: data
+      data: data,
+      turboThreshold: 0
     }
   }
 
   function createWindDirectionData(data) {
-    var windGustData      = data.map(function(datum) { return datum.wind_gusts });
-    var chartMax      = Math.max.apply(null, windGustData);
-    var windDirectionSeriesValue = chartMax + 5;
-
+    var windGustData              = data.map(function(datum) { return datum.wind_gusts });
+    var chartMax                  = Math.max.apply(null, windGustData);
+    var windDirectionSeriesValue  = chartMax + 5;
+    var windData                  = [];
+    var dataGroupSize             = Math.round(windGustData.length / 10);
+    var startIndex                = 0;
+    var endIndex                  = dataGroupSize;
 
     var createNullDataSet = function(length) {
       var half = Math.round(length / 2);
@@ -248,22 +257,17 @@ if (!snowSense) var snowSense = {};
       return array;
     };
 
-    var windData = [];
-    var dataGroupSize = Math.round(windGustData.length / 10);
-    var startIndex = 0;
-    var endIndex = dataGroupSize;
-
     for (i = 0; i < 10; i++) {
       if (i > 0) startIndex += dataGroupSize;
       if (i > 0) startIndex += 1;
-      endIndex    = startIndex + dataGroupSize;
+      endIndex = startIndex + dataGroupSize;
 
       if (i === 9) endIndex = data.length - 1;
 
       var currentGroup = data.slice(startIndex, endIndex);
 
       //var direction = getPrevailingWindDirection(currentGroup);
-      var direction = windDirectionSeriesValue;//'SSW';
+      var direction = { y: windDirectionSeriesValue, direction: 'SSW',  marker: { symbol: 'url(/assets/arrow.png)', width: 30, height: 30 } };//'SSW';
 
       var nullDataSet = createNullDataSet(dataGroupSize);
       var thisDataSet = [];
@@ -274,7 +278,7 @@ if (!snowSense) var snowSense = {};
       if (thisDataSet.length > dataGroupSize) thisDataSet.pop();
       windData = windData.concat(thisDataSet);
     }
-
+    console.log(windData)
     return windData;
   }
 

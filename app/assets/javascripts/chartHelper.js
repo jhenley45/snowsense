@@ -3,22 +3,22 @@ if (!snowSense) var snowSense = {};
 (function() {
 
   var windDirectionImages = {
-    "N": 'url(/assets/N.png)',
-    "NNE": 'url(/assets/NNE.png)',
-    "NE": 'url(/assets/NE.png)',
-    "ENE": 'url(/assets/ENE.png)',
-    "E": 'url(/assets/E.png)',
-    "ESE": 'url(/assets/ESE.png)',
-    "SE": 'url(/assets/SE.png)',
-    "SSE": 'url(/assets/SSE.png)',
-    "S": 'url(/assets/S.png)',
-    "SSW": 'url(/assets/SSW.png)',
-    "SW": 'url(/assets/SW.png)',
-    "WSW": 'url(/assets/WSW.png)',
-    "W": 'url(/assets/W.png)',
-    "WNW": 'url(/assets/WNW.png)',
-    "NW": 'url(/assets/NW.png)',
-    "NNW": 'url(/assets/NNW.png)'
+    "N": 'url(/assets/N1.png)',
+    "NNE": 'url(/assets/NNE1.png)',
+    "NE": 'url(/assets/NE1.png)',
+    "ENE": 'url(/assets/ENE1.png)',
+    "E": 'url(/assets/E1.png)',
+    "ESE": 'url(/assets/ESE1.png)',
+    "SE": 'url(/assets/SE1.png)',
+    "SSE": 'url(/assets/SSE1.png)',
+    "S": 'url(/assets/S1.png)',
+    "SSW": 'url(/assets/SSW1.png)',
+    "SW": 'url(/assets/SW1.png)',
+    "WSW": 'url(/assets/WSW1.png)',
+    "W": 'url(/assets/W1.png)',
+    "WNW": 'url(/assets/WNW1.png)',
+    "NW": 'url(/assets/NW1.png)',
+    "NNW": 'url(/assets/NNW1.png)'
   };
 
   function drawWindChart(data, stid) {

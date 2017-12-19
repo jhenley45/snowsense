@@ -2,6 +2,25 @@ if (!snowSense) var snowSense = {};
 
 (function() {
 
+  var windDirectionImages = {
+    "N": 'url(/assets/N.png)',
+    "NNE": 'url(/assets/NNE.png)',
+    "NE": 'url(/assets/NE.png)',
+    "ENE": 'url(/assets/ENE.png)',
+    "E": 'url(/assets/E.png)',
+    "ESE": 'url(/assets/ESE.png)',
+    "SE": 'url(/assets/SE.png)',
+    "SSE": 'url(/assets/SSE.png)',
+    "S": 'url(/assets/S.png)',
+    "SSW": 'url(/assets/SSW.png)',
+    "SW": 'url(/assets/SW.png)',
+    "WSW": 'url(/assets/WSW.png)',
+    "W": 'url(/assets/W.png)',
+    "WNW": 'url(/assets/WNW.png)',
+    "NW": 'url(/assets/NW.png)',
+    "NNW": 'url(/assets/NNW.png)'
+  };
+
   function drawWindChart(data, stid) {
 
     var windSpeedData;
@@ -44,15 +63,15 @@ if (!snowSense) var snowSense = {};
                 text: 'Wind Speed (mph)'
             },
             plotLines: [{
-              color: '#D91E18', // Color value
-              dashStyle: 'solid', // Style of the plot line. Default to solid
-              value: 21, // Value of where the line will appear
-              width: 1, // Width of the line
-              label: {
-                //text: 'Est. Transported Snow Speed', // Content of the label.
-                align: 'left', // Positioning of the label.
-              },
-              zIndex: 5
+              // color: '#D91E18', // Color value
+              // dashStyle: 'solid', // Style of the plot line. Default to solid
+              // value: 21, // Value of where the line will appear
+              // width: 1, // Width of the line
+              // label: {
+              //   //text: 'Est. Transported Snow Speed', // Content of the label.
+              //   align: 'left', // Positioning of the label.
+              // },
+              // zIndex: 5
             }]
         },
         tooltip: {
@@ -73,15 +92,7 @@ if (!snowSense) var snowSense = {};
         series: [
           createWindSpeedSeries(windSpeedData),
           createWindGustSeries(windGustData),
-          createWindDirectionSeries(windDirectionData),
-          {
-              name: '',
-              type: 'scatter',
-              marker: {
-                enabled: false
-              },
-              data: [21]
-           }
+          createWindDirectionSeries(windDirectionData)
          ]
     });
 
@@ -257,6 +268,26 @@ if (!snowSense) var snowSense = {};
       return array;
     };
 
+    var getPrevailingWindDirection = function(group) {
+      var windCounts              = {};
+      var prevailingWind          = "W";
+      var maxWindDirectionCount   = 0;
+
+      group.forEach(function(object) {
+        if (windCounts[object.wind_directions]) windCounts[object.wind_directions] += 1;
+        else windCounts[object.wind_directions] = 1;
+      });
+
+      $.each(windCounts, function(key, value) {
+        if (value > maxWindDirectionCount) {
+          maxWindDirectionCount = value;
+          prevailingWind = key;
+        }
+      });
+
+      return prevailingWind;
+    };
+
     for (i = 0; i < 10; i++) {
       if (i > 0) startIndex += dataGroupSize;
       if (i > 0) startIndex += 1;
@@ -265,9 +296,8 @@ if (!snowSense) var snowSense = {};
       if (i === 9) endIndex = data.length - 1;
 
       var currentGroup = data.slice(startIndex, endIndex);
-
-      //var direction = getPrevailingWindDirection(currentGroup);
-      var direction = { y: windDirectionSeriesValue, direction: 'SSW',  marker: { symbol: 'url(/assets/arrow.png)', width: 30, height: 30 } };//'SSW';
+      var direction = getPrevailingWindDirection(currentGroup);
+      var direction = { y: windDirectionSeriesValue, direction: direction,  marker: { symbol: windDirectionImages[direction], width: '2em', height: '1em' } };//'SSW';
 
       var nullDataSet = createNullDataSet(dataGroupSize);
       var thisDataSet = [];
@@ -278,7 +308,7 @@ if (!snowSense) var snowSense = {};
       if (thisDataSet.length > dataGroupSize) thisDataSet.pop();
       windData = windData.concat(thisDataSet);
     }
-    console.log(windData)
+
     return windData;
   }
 

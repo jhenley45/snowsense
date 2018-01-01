@@ -1,3 +1,4 @@
+@import "colors";
 
 body {
   background-color: #F9F9FA;
@@ -30,4 +31,23 @@ body {
   border-radius: 0.25rem;
   margin: 10px 0;
   text-align: center;
+}
+
+.generic-button {
+  text-decoration: none;
+  color: #fff;
+  background-color: $primary-color;
+  text-align: center;
+  letter-spacing: .5px;
+  position: relative;
+  cursor: pointer;
+  display: inline-block;
+  padding: 0.5em;
+  border-radius: 2px;
+  text-transform: uppercase;
+  box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12), 0 3px 1px -2px rgba(0,0,0,0.2);
+}
+
+.strong-hide {
+  display: none !important;
 }

@@ -6,7 +6,8 @@
 <% end %> -->
 
 <div id="new-station">
-  <input class="typeahead" type="text" placeholder="Add new station...">
+  <a class="generic-button add-station">Add Station</a>
+  <input class="typeahead strong-hide" type="text" placeholder="Add new station...">
 </div>
 
 
@@ -140,9 +141,8 @@
 $(document).ready(function() {
 
   getStationList();
-  addDaysBackInputHandler();
+  addHandlers();
   addDefaultDaysBack();
-  addToggleSeriesHandler();
 
 });
 
@@ -153,6 +153,12 @@ var windGustDayLimit = 6;
 var onInitialChartLoad = function(data, station) {
   snowSense.chartHelper.drawTempChart(data, station.stid);
   snowSense.chartHelper.drawWindChart(data, station.stid);
+};
+
+var addHandlers = function() {
+  addDaysBackInputHandler();
+  addToggleSeriesHandler();
+  addStationButtonHandler();
 };
 
 var getStationList = function() {
@@ -194,6 +200,22 @@ var addDefaultDaysBack = function() {
 
   var inputs = $('.day-selector input');
   inputs.val(defaultDaysBack);
+
+};
+
+var addStationButtonHandler = function() {
+
+  var onClick = function(e) {
+    var $target     = $(e.target);
+    var $stationDiv = $target.closest('#new-station');
+    var $twitterInput = $stationDiv.find('.tt-input');
+
+    $target.hide();
+    $twitterInput.removeClass('strong-hide');
+    $twitterInput.focus();
+  };
+
+  $('.add-station').click(onClick);
 
 };
 

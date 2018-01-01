@@ -13,4 +13,5 @@
 //= require jquery
 //= require jquery_ujs
 //= require highcharts
+//= require materialize
 //= require_tree .

@@ -50,6 +50,6 @@ gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 
 gem 'devise'
 gem 'dotenv-rails'
-gem 'bootstrap'
 gem 'httparty'
 gem 'highcharts-rails'
+gem 'materialize-sass'

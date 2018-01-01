@@ -11,8 +11,8 @@
 </div>
 
 
-<div class="station">
-  <h1>My Stations</h1>
+<div class="station-list">
+  <h2>My Stations</h2>
 
   <% if @stations.length > 0 %>
     <table class="table station-table highlight responsive-table bordered">
@@ -49,75 +49,80 @@
 
   <div class="station">
 
-    <div class="col-xs-12">
+    <div class="station-header">
       <h2 class="station-title"><%= station[:name] %> (<%= station[:stid] %>)</h2>
     </div>
 
-    <% station[:tables].each do |table| %>
-      <h3><%= table[:title] %></h3>
+    <div class="station-content">
+      <% station[:tables].each do |table| %>
+        <h3><%= table[:title] %></h3>
 
-      <table class="table station-table">
-        <thead>
-          <tr>
-            <th scope="col"></th>
-            <th scope="col">Past 24</th>
-            <th scope="col">Past 48</th>
-            <th scope="col">Past 72</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% table[:rows].each do |datum| %>
+        <table class="table station-table striped">
+          <thead>
             <tr>
-              <th scope="row"><%= table[:short_title] %> <%= datum[:spec] %></th>
-              <td><%= datum[:hourly][:twenty_four] || 'N/A' %></td>
-              <td><%= datum[:hourly][:fourty_eight] || 'N/A' %></td>
-              <td><%= datum[:hourly][:seventy_two] || 'N/A' %></td>
+              <th scope="col"></th>
+              <th scope="col">Past 24</th>
+              <th scope="col">Past 48</th>
+              <th scope="col">Past 72</th>
             </tr>
-          <% end %>
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            <% table[:rows].each do |datum| %>
+              <tr>
+                <th scope="row"><%= table[:short_title] %> <%= datum[:spec] %></th>
+                <td><%= datum[:hourly][:twenty_four] || 'N/A' %></td>
+                <td><%= datum[:hourly][:fourty_eight] || 'N/A' %></td>
+                <td><%= datum[:hourly][:seventy_two] || 'N/A' %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
 
-    <% end %>
+      <% end %>
 
-    <section class="charts">
+      <section class="charts">
 
-      <div class="row chart-block">
-        <div class="col-md-4">
-          <h3>Temperature</h3>
+        <div class="row chart-block">
+          <div class="col-md-4">
+            <h3>Temperature</h3>
+          </div>
+
+          <div class="day-selector col-md-4 pull-right">
+            <span>Go back
+              <input class="days-back"> days
+              <button class="change-days" data-chartType="temperature">GO</button>
+            </span>
+
+          </div>
+          <div id="temperature-chart-<%= station[:stid] %>" class="temperature-chart chart loading-icon" data-stationId="<%= station[:id] %>"></div>
         </div>
 
-        <div class="day-selector col-md-4 pull-right">
-          <span>Go back
-            <input class="days-back"> days
-            <button class="change-days" data-chartType="temperature">GO</button>
-          </span>
 
+        <div class="row chart-block">
+          <div class="col-md-4">
+            <h3>Wind</h3>
+          </div>
+
+          <div class="col-md-4 toggle-buttons">
+            <button class="toggle-button active" data-seriesId="windGust">Gusts</button>
+            <button class="toggle-button active" data-seriesId="windSpeed">Wind</button>
+          </div>
+
+          <div class="day-selector col-md-4 pull-right">
+            <span>Go back
+              <input class="days-back"> days
+              <button class="change-days" data-chartType="wind">GO</button>
+            </span>
+
+          </div>
+          <div id="wind-chart-<%= station[:stid] %>" class="wind-chart chart loading-icon" data-stationId="<%= station[:id] %>"></div>
         </div>
-        <div id="temperature-chart-<%= station[:stid] %>" class="temperature-chart chart loading-icon" data-stationId="<%= station[:id] %>"></div>
-      </div>
+
+      </section>
+
+    </div>
 
 
-      <div class="row chart-block">
-        <div class="col-md-4">
-          <h3>Wind</h3>
-        </div>
-
-        <div class="col-md-4 toggle-buttons">
-          <button class="toggle-button active" data-seriesId="windGust">Gusts</button>
-          <button class="toggle-button active" data-seriesId="windSpeed">Wind</button>
-        </div>
-
-        <div class="day-selector col-md-4 pull-right">
-          <span>Go back
-            <input class="days-back"> days
-            <button class="change-days" data-chartType="wind">GO</button>
-          </span>
-
-        </div>
-        <div id="wind-chart-<%= station[:stid] %>" class="wind-chart chart loading-icon" data-stationId="<%= station[:id] %>"></div>
-      </div>
-
-    </section>
 
   </div>
 
@@ -137,6 +142,7 @@
 // Ensure data point only every 15 minutes
 // Rm decimals from charts
 // Precipitation density graph
+// Add map of stations, click to go to station info
 
 $(document).ready(function() {
 

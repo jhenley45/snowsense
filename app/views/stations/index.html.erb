@@ -18,7 +18,7 @@
 
   <div class="station-list-content">
     <% if @stations.length > 0 %>
-      <table class="table station-table highlight responsive-table bordered">
+      <table class="table station-table click-to-scroll highlight responsive-table bordered">
         <thead>
           <tr>
             <th scope="col"></th>
@@ -31,8 +31,8 @@
         <tbody>
           <% @stations.each do |station| %>
 
-            <tr>
-              <th scope="row" class="station-name"><a href="#station-<%= station[:id] %>"><%= station.name %></a></th>
+            <tr data-stationId="<%= station[:id] %>">
+              <th scope="row" class="station-name"><%= station.name %></th>
               <td class="text-center"><%= station.state %></td>
               <td class="text-center"><%= number_with_delimiter(station.elevation, delimiter: ',') %> ft.</td>
               <td class="text-center"><%= link_to 'Remove', station_path(station), method: :delete, data: { confirm: 'Are you sure?' } %></td>
@@ -65,18 +65,18 @@
           <thead>
             <tr>
               <th scope="col"></th>
-              <th scope="col">Past 24</th>
-              <th scope="col">Past 48</th>
-              <th scope="col">Past 72</th>
+              <th class="text-center" scope="col">Past 24</th>
+              <th class="text-center" scope="col">Past 48</th>
+              <th class="text-center" scope="col">Past 72</th>
             </tr>
           </thead>
           <tbody>
             <% table[:rows].each do |datum| %>
               <tr>
                 <th scope="row"><%= table[:short_title] %> <%= datum[:spec] %></th>
-                <td><%= datum[:hourly][:twenty_four] || 'N/A' %></td>
-                <td><%= datum[:hourly][:fourty_eight] || 'N/A' %></td>
-                <td><%= datum[:hourly][:seventy_two] || 'N/A' %></td>
+                <td class="text-center"><%= number_with_precision(datum[:hourly][:twenty_four], precision: 0) || 'N/A' %></td>
+                <td class="text-center"><%= number_with_precision(datum[:hourly][:fourty_eight], precision: 0) || 'N/A' %></td>
+                <td class="text-center"><%= number_with_precision(datum[:hourly][:seventy_two], precision: 0) || 'N/A' %></td>
               </tr>
             <% end %>
           </tbody>
@@ -147,6 +147,7 @@
 // Rm decimals from charts
 // Precipitation density graph
 // Add map of stations, click to go to station info
+// Add map of stations when adding a new station
 
 $(document).ready(function() {
 
@@ -169,6 +170,7 @@ var addHandlers = function() {
   addDaysBackInputHandler();
   addToggleSeriesHandler();
   addStationButtonHandler();
+  addStationListClickHandler();
 };
 
 var getStationList = function() {
@@ -211,6 +213,22 @@ var addDefaultDaysBack = function() {
   var inputs = $('.day-selector input');
   inputs.val(defaultDaysBack);
 
+};
+
+var addStationListClickHandler = function() {
+  var onClick = function(e) {
+    var $target     = $(e.target);
+    var $row        = $target.closest('tr');
+    var stationId   = $row.attr('data-stationId');
+
+    document.getElementById('station-' + stationId).scrollIntoView({block: 'start', behavior: 'smooth'});
+
+    // $target.hide();
+    // $twitterInput.removeClass('strong-hide');
+    // $twitterInput.focus();
+  };
+
+  $('.station-list .click-to-scroll tr').click(onClick);
 };
 
 var addStationButtonHandler = function() {

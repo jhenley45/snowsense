@@ -6,6 +6,7 @@
 
 .station-list {
   margin: 2em 0 4em 0;
+  border: 1px solid #9e9e9e;
 
   .station-title {
     text-align: center;
@@ -18,21 +19,18 @@
     color: #fff;
     background-color: #9e9e9e;
     padding: 1em;
-    border-radius: 5px;
   }
 
   .station-list-content {
-    padding: 1em;
+    padding: 2em;
   }
 
   .station-table {
 
     tbody {
 
-      .station-name {
-        a {
-          color: rgba(0, 0, 0, 0.87);
-        }
+      tr {
+        cursor: pointer;
       }
     }
   }
@@ -67,7 +65,8 @@
     }
 
     .station-table {
-      margin-bottom: 5em;
+      width: 90%;
+      margin: 0 auto 5em auto;
     }
 
     .toggle-buttons {

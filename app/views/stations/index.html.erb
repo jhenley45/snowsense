@@ -16,33 +16,35 @@
     <h2 class="station-title">My Stations</h2>
   </div>
 
-  <% if @stations.length > 0 %>
-    <table class="table station-table highlight responsive-table bordered">
-      <thead>
-        <tr>
-          <th scope="col"></th>
-          <th scope="col">State</th>
-          <th scope="col">Elevation</th>
-          <th scope="col"></th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <% @stations.each do |station| %>
-
+  <div class="station-list-content">
+    <% if @stations.length > 0 %>
+      <table class="table station-table highlight responsive-table bordered">
+        <thead>
           <tr>
-            <th scope="row"><%= station.name %></th>
-            <td><%= station.state %></td>
-            <td><%= station.elevation %></td>
-            <td><%= link_to 'Remove', station_path(station), method: :delete, data: { confirm: 'Are you sure?' } %></td>
+            <th scope="col"></th>
+            <th class="text-center" scope="col">State</th>
+            <th class="text-center" scope="col">Elevation</th>
+            <th class="text-center" scope="col"></th>
           </tr>
+        </thead>
 
-        <% end %>
-      </tbody>
-    </table>
-  <% else %>
-    You do not have any saved stations. Please add a station to see data.
-  <% end %>
+        <tbody>
+          <% @stations.each do |station| %>
+
+            <tr>
+              <th scope="row" class="station-name"><a href="#station-<%= station[:id] %>"><%= station.name %></a></th>
+              <td class="text-center"><%= station.state %></td>
+              <td class="text-center"><%= number_with_delimiter(station.elevation, delimiter: ',') %> ft.</td>
+              <td class="text-center"><%= link_to 'Remove', station_path(station), method: :delete, data: { confirm: 'Are you sure?' } %></td>
+            </tr>
+
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      You do not have any saved stations. Please add a station to see data.
+    <% end %>
+  </div>
 </div>
 
 
@@ -51,7 +53,7 @@
 
   <div class="station">
 
-    <div class="station-header">
+    <div class="station-header" id="station-<%= station[:id] %>">
       <h2 class="station-title"><%= station[:name] %> (<%= station[:stid] %>)</h2>
     </div>
 

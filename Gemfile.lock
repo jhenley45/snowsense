@@ -59,6 +59,7 @@ GEM
     erubis (2.7.0)
     execjs (2.7.0)
     ffi (1.9.18)
+    geocoder (1.2.9)
     globalid (0.4.1)
       activesupport (>= 4.2.0)
     highcharts-rails (6.0.2)
@@ -185,6 +186,7 @@ DEPENDENCIES
   byebug
   devise
   dotenv-rails
+  geocoder
   highcharts-rails
   httparty
   jbuilder (~> 2.5)

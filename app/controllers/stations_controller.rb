@@ -240,6 +240,32 @@ class StationsController < ApplicationController
     render json: results
   end
 
+  def active_stations
+
+    active_stations = Station.near("Jackson, Wyoming").where(is_active: 1)
+
+    geo_json = []
+
+    active_stations.each do |station|
+      geo_json << {
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [station.longitude, station.latitude]
+        },
+        properties: {
+          name: station.name,
+          address: 'meow',
+          :'marker-color' => '#00607d',
+          :'marker-symbol' => 'circle',
+          :'marker-size' => 'medium'
+        }
+      }
+    end
+
+    render json: geo_json
+  end
+
 
   private
 

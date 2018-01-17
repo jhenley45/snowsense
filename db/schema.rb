@@ -10,17 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171112193917) do
+ActiveRecord::Schema.define(version: 20180117230302) do
 
   create_table "stations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string   "name"
     t.integer  "elevation"
     t.string   "stid"
-    t.string   "longitude"
-    t.string   "latitude"
+    t.decimal  "longitude",  precision: 10, scale: 6
+    t.decimal  "latitude",   precision: 10, scale: 6
     t.string   "state"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at",                          null: false
+    t.datetime "updated_at",                          null: false
+    t.integer  "mnet_id"
+    t.boolean  "is_active"
+    t.index ["is_active"], name: "index_stations_on_is_active", using: :btree
   end
 
   create_table "user_stations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|

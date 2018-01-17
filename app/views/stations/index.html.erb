@@ -7,7 +7,11 @@
 
 <div id="new-station">
   <a class="generic-button add-station">Add Station</a>
-  <input class="typeahead strong-hide" type="text" placeholder="Add new station...">
+  <input class="typeahead strong-hide" type="text" placeholder="Add new station by name...">
+</div>
+
+<div class="mapbox-container">
+  <div id='mapbox-map' style='width: 100%; height: 800px;'></div>
 </div>
 
 
@@ -149,6 +153,7 @@
 
 $(document).ready(function() {
 
+  initializeMap();
   getStationList();
   addHandlers();
   addDefaultDaysBack();
@@ -407,6 +412,55 @@ var addUserStation = function(stid) {
 $('.typeahead').on('typeahead:selected', function(evt, item) {
   $('.typeahead').typeahead('val', '');
   addUserStation(item.stid);
-})
+});
+
+
+var initializeMap = function() {
+
+  $.ajax({
+     url: '/stations/active_stations',
+     dataType: 'json',
+     type: 'GET'
+  }).done(function(data) {
+      console.log(data);
+
+      data.forEach(function(marker) {
+        // create a DOM element for the marker
+        var el = document.createElement('div');
+        el.className = 'marker';
+        el.style.backgroundImage = 'url(https://placekitten.com/g/200/300/)';
+        el.style.width = '10px';
+        el.style.height = '10px';
+
+        el.addEventListener('click', function(one, two) {
+          debugger
+        });
+
+        // add marker to map
+        new mapboxgl.Marker(el)
+          .setLngLat(marker.geometry.coordinates.map(function(coord) { return parseFloat(coord) }))
+          .addTo(map);
+      });
+
+  }).fail(function(error) {
+      console.log(error);
+  });
+
+  mapboxgl.accessToken = 'pk.eyJ1IjoiamhlbmxleSIsImEiOiJjamNqbDBuZHA0ZmFlMnFvNTV5ZWJtOTJqIn0.YsUjp-03ob3AzW1lkPvpmw';
+
+  var map = new mapboxgl.Map({
+    container: 'mapbox-map',
+    style: 'mapbox://styles/mapbox/outdoors-v10',
+    center: [-110.834441, 43.501072], // starting position [lng, lat]
+    zoom: 9 // starting zoom
+  });
+
+  map.addControl(new mapboxgl.NavigationControl())
+
+  map.on('zoom',function(meow) {
+    console.log(meow)
+  })
+}
+
 
 </script>

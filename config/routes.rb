@@ -8,7 +8,8 @@ Rails.application.routes.draw do
     end
 
     get     'station_list', to: 'stations#station_list'
-    get '/stations/search', to: 'stations#search'
+    get     '/stations/search', to: 'stations#search'
+    get     '/stations/active_stations', to: 'stations#active_stations'
 
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 end

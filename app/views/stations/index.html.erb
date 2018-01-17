@@ -59,7 +59,7 @@
 
     <div class="station-content">
       <% station[:tables].each do |table| %>
-        <h3><%= table[:title] %></h3>
+        <div class="data-header"><%= table[:title] %></div class="data-header">
 
         <table class="table station-table striped">
           <thead>
@@ -88,7 +88,7 @@
 
         <div class="row chart-block">
           <div class="col-md-4">
-            <h3>Temperature</h3>
+            <div class="data-header">Temperature</div class="data-header">
           </div>
 
           <div class="day-selector col-md-4 pull-right">
@@ -104,7 +104,7 @@
 
         <div class="row chart-block">
           <div class="col-md-4">
-            <h3>Wind</h3>
+            <div class="data-header">Wind</div class="data-header">
           </div>
 
           <div class="col-md-4 toggle-buttons">
@@ -138,13 +138,11 @@
 
 
 
-// Add wind direction to wind chart
 // refactor out AJAX
 // Mark times when faceting could occur on temp graph
 // Allow user to create nickname for station
 // Add ability to order stations w drag and drop
 // Ensure data point only every 15 minutes
-// Rm decimals from charts
 // Precipitation density graph
 // Add map of stations, click to go to station info
 // Add map of stations when adding a new station

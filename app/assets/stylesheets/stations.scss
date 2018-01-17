@@ -54,14 +54,20 @@
     background-color: $primary-color;
     padding: 1em;
     border-radius: 5px 5px 0 0;
+    margin-bottom: 2em;
   }
 
   .station-content {
     padding: 1em 2em;
 
-    h3 {
-      text-align: center;
-      margin: 1em 0 0.5em 0;
+    .data-header {
+        padding: 0.4em;
+        background-color: #ECF0F1;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        font-size: 2em;
+        text-align: center;
+        margin-bottom: 1em;
     }
 
     .station-table {

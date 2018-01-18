@@ -255,10 +255,7 @@ class StationsController < ApplicationController
         },
         properties: {
           name: station.name,
-          address: 'meow',
-          :'marker-color' => '#00607d',
-          :'marker-symbol' => 'circle',
-          :'marker-size' => 'medium'
+          elevation: station.elevation
         }
       }
     end

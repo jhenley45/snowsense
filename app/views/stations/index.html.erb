@@ -417,6 +417,22 @@ $('.typeahead').on('typeahead:selected', function(evt, item) {
 
 var initializeMap = function() {
 
+  var createMarkerPopup = function(marker) {
+    var $div = $('<div>');
+    var $popup = $('<div class="station-popup"></div>');
+    $popup.append($('<div class="title">' + marker.properties.name + '</div>'));
+    $popup.append($('<div class="elevation">Elevation: ' + marker.properties.elevation + '</div>'));
+
+    var $buttons = $('<div class="buttons"></div>');
+    $buttons.append($('<a class="left" href="#">Save</a>'));
+    $buttons.append($('<a class="right" href="#">Quick View</a>'));
+
+    $popup.append($buttons);
+
+    $div.append($popup);
+    return $div.html();
+  }
+
   $.ajax({
      url: '/stations/active_stations',
      dataType: 'json',
@@ -425,20 +441,25 @@ var initializeMap = function() {
       console.log(data);
 
       data.forEach(function(marker) {
+        var coordinates = marker.geometry.coordinates.map(function(coord) { return parseFloat(coord) });
         // create a DOM element for the marker
         var el = document.createElement('div');
-        el.className = 'marker';
-        el.style.backgroundImage = 'url(https://placekitten.com/g/200/300/)';
+        el.className = 'station-marker';
+        el.style.backgroundImage = 'url(https://placekitten.com/g/200/)';
         el.style.width = '10px';
         el.style.height = '10px';
 
-        el.addEventListener('click', function(one, two) {
-          debugger
-        });
+        // el.addEventListener('click', function() {
+        //
+        // });
+
+        var popup = new mapboxgl.Popup()
+          .setHTML(createMarkerPopup(marker));
 
         // add marker to map
         new mapboxgl.Marker(el)
-          .setLngLat(marker.geometry.coordinates.map(function(coord) { return parseFloat(coord) }))
+          .setLngLat(coordinates)
+          .setPopup(popup)
           .addTo(map);
       });
 
@@ -458,7 +479,7 @@ var initializeMap = function() {
   map.addControl(new mapboxgl.NavigationControl())
 
   map.on('zoom',function(meow) {
-    console.log(meow)
+    // only fetch when zooming out, and zoom is greater than initial zoom
   })
 }
 

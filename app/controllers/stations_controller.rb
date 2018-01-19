@@ -255,7 +255,9 @@ class StationsController < ApplicationController
         },
         properties: {
           name: station.name,
-          elevation: station.elevation
+          elevation: station.elevation,
+          id: station.id,
+          stid: station.stid
         }
       }
     end

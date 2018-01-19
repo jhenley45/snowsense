@@ -174,6 +174,7 @@ var addHandlers = function() {
   addToggleSeriesHandler();
   addStationButtonHandler();
   addStationListClickHandler();
+  addSaveStationClickHandler();
 };
 
 var getStationList = function() {
@@ -420,18 +421,20 @@ var initializeMap = function() {
   var createMarkerPopup = function(marker) {
     var $div = $('<div>');
     var $popup = $('<div class="station-popup"></div>');
+    $popup.attr('data-stationId', marker.properties.stid);
     $popup.append($('<div class="title">' + marker.properties.name + '</div>'));
     $popup.append($('<div class="elevation">Elevation: ' + marker.properties.elevation + '</div>'));
 
     var $buttons = $('<div class="buttons"></div>');
-    $buttons.append($('<a class="left" href="#">Save</a>'));
-    $buttons.append($('<a class="right" href="#">Quick View</a>'));
+    $buttons.append($('<a class="left">Save</a>'));
+    $buttons.append($('<a class="right">Quick View</a>'));
 
     $popup.append($buttons);
 
     $div.append($popup);
+
     return $div.html();
-  }
+  };
 
   $.ajax({
      url: '/stations/active_stations',
@@ -456,6 +459,7 @@ var initializeMap = function() {
         var popup = new mapboxgl.Popup()
           .setHTML(createMarkerPopup(marker));
 
+
         // add marker to map
         new mapboxgl.Marker(el)
           .setLngLat(coordinates)
@@ -469,6 +473,7 @@ var initializeMap = function() {
 
   mapboxgl.accessToken = 'pk.eyJ1IjoiamhlbmxleSIsImEiOiJjamNqbDBuZHA0ZmFlMnFvNTV5ZWJtOTJqIn0.YsUjp-03ob3AzW1lkPvpmw';
 
+  console.log("WARN: Hard-coded lat/long for map start");
   var map = new mapboxgl.Map({
     container: 'mapbox-map',
     style: 'mapbox://styles/mapbox/outdoors-v10',
@@ -480,8 +485,23 @@ var initializeMap = function() {
 
   map.on('zoom',function(meow) {
     // only fetch when zooming out, and zoom is greater than initial zoom
-  })
-}
+  });
+
+  // TODO add handler for when map is moved as well (dragged)
+};
+
+var addSaveStationClickHandler = function() {
+
+  var onSave = function(e) {
+    var $target   = $(e.target);
+    var $popup    = $target.closest('.station-popup');
+    var stationId = $popup.attr('data-stationId');
+
+    addUserStation(stationId);
+  };
+
+  $('body').on('click', 'a.left', onSave);
+};
 
 
 </script>

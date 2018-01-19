@@ -55,7 +55,7 @@
 
 <% @station_data.each do |station| %>
 
-  <div class="station">
+  <div class="station station-list-item">
 
     <div class="station-header" id="station-<%= station[:id] %>">
       <h2 class="station-title"><%= station[:name] %> (<%= station[:stid] %>)</h2>
@@ -139,10 +139,12 @@
 
   <!-- Modal Structure -->
   <div id="quick-view-modal" class="modal">
-    <div class="modal-content">
-      <h4 class="header"></h4>
+    <div class="modal-content station">
+      <div class="station-header">
+        <h2 class="station-title"></h2>
+      </div>
 
-      <section class="charts">
+      <section class="charts station-content">
 
         <div class="row chart-block">
           <div class="col-md-4">
@@ -549,7 +551,7 @@ var addQuickViewClickHandler = function() {
 
     $tempChart.attr('id', 'temperature-chart-' + stationId);
     $windChart.attr('id', 'wind-chart-' + stationId);
-    $modal.find('.header').text(title);
+    $modal.find('.station-title').text(title);
     $modal.modal('open');
 
     var daysBack    = defaultDaysBack;

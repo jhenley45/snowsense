@@ -36,11 +36,14 @@
   }
 }
 
-.station {
+.station-list-item {
   margin: 2em 0em;
   border-radius: 5px;
   background-color: #fff;
   box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12), 0 3px 1px -2px rgba(0,0,0,0.2);
+}
+
+.station {
 
   .station-title {
     text-align: center;
@@ -256,4 +259,14 @@
   max-height: 90%;
   width: 90%;
   top: 5% !important;
+
+  .modal-content {
+
+    padding: 0px;
+
+    .header {
+      text-align: center;
+    }
+
+  }
 }

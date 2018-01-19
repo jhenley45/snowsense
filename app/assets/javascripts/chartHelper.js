@@ -21,6 +21,102 @@ if (!snowSense) var snowSense = {};
     "NNW": 'url(/assets/NNW1.png)'
   };
 
+  function initializeEmptyWindChart($element) {
+
+    var chart = $element.highcharts({
+      chart: {
+          type: 'line'
+      },
+      title: {
+          text: 'Recent Wind Speed'
+      },
+      subtitle: {
+          text: 'Source: MesoWest'
+      },
+      xAxis: {
+          categories: [],
+          labels: {
+              rotation: 45
+          },
+          minTickInterval: 20
+      },
+      yAxis: {
+          title: {
+              text: 'Wind Speed (mph)'
+          },
+          plotLines: [{
+            // color: '#D91E18', // Color value
+            // dashStyle: 'solid', // Style of the plot line. Default to solid
+            // value: 21, // Value of where the line will appear
+            // width: 1, // Width of the line
+            // label: {
+            //   //text: 'Est. Transported Snow Speed', // Content of the label.
+            //   align: 'left', // Positioning of the label.
+            // },
+            // zIndex: 5
+          }]
+      },
+      tooltip: {
+          formatter: function() {
+            if (this.point.direction) {
+              return 'Prevailing Wind: <b>' + this.point.direction + '</b>';
+            } else {
+              return '' + this.series.name + ' on' + this.x + ' was <b>' + this.y + '</b> mph';
+            }
+
+          }
+      },
+      series: []
+    });
+
+    return chart.highcharts();
+  };
+
+  function initializeEmptyTemperatureChart($element) {
+
+    var chart = $element.highcharts({
+      chart: {
+          type: 'line'
+      },
+      title: {
+          text: 'Recent Temperature'
+      },
+      subtitle: {
+          text: 'Source: MesoWest'
+      },
+      xAxis: {
+          categories: [],
+          labels: {
+              rotation: 45
+          },
+          minTickInterval: 10
+      },
+      yAxis: {
+          title: {
+              text: 'Temperature (°F)'
+          },
+          plotLines: [{
+            color: '#D91E18', // Color value
+            dashStyle: 'solid', // Style of the plot line. Default to solid
+            value: 32, // Value of where the line will appear
+            width: 1, // Width of the line
+            label: {
+              text: '32 °F', // Content of the label.
+              align: 'left', // Positioning of the label.
+            }
+          }]
+      },
+      tooltip: {
+          formatter: function() {
+              return 'The temperature on' + this.x + ' was <b>' + this.y + '</b> degrees Farenheit';
+          }
+      },
+      series: []
+    });
+
+    return chart.highcharts();
+  };
+
   function drawWindChart(data, stid) {
 
     var windSpeedData;
@@ -112,7 +208,7 @@ if (!snowSense) var snowSense = {};
 
     Highcharts.chart(element, {
         chart: {
-            type: 'line'
+            type: 'line',
         },
         title: {
             text: 'Recent Temperature'
@@ -314,12 +410,14 @@ if (!snowSense) var snowSense = {};
 
 
   snowSense.chartHelper = {
-    drawWindChart:          drawWindChart,
-    drawTempChart:          drawTempChart,
-    removeAllSeries:        removeAllSeries,
-    addWindGustSeries:      addWindGustSeries,
-    addWindSpeedSeries:     addWindSpeedSeries,
-    addWindDirectionSeries: addWindDirectionSeries
+    initializeEmptyTemperatureChart:  initializeEmptyTemperatureChart,
+    initializeEmptyWindChart:         initializeEmptyWindChart,
+    drawWindChart:                    drawWindChart,
+    drawTempChart:                    drawTempChart,
+    removeAllSeries:                  removeAllSeries,
+    addWindGustSeries:                addWindGustSeries,
+    addWindSpeedSeries:               addWindSpeedSeries,
+    addWindDirectionSeries:           addWindDirectionSeries
   };
 
 }());

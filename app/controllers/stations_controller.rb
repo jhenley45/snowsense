@@ -152,7 +152,7 @@ class StationsController < ApplicationController
 
       if existing_station
         if current_user.stations.find_by_stid(existing_station.stid)
-          flash[:warning] = "Station already exists."
+          flash[:warning] = "You have already added this station to your profile."
         else
           current_user.stations << existing_station
           flash[:success] = "Station has been added to your profile."

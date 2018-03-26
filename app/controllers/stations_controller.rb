@@ -13,7 +13,7 @@ class StationsController < ApplicationController
 
     @station_data = []
 
-    @stations = current_user.stations
+    @stations = current_user.stations.includes(:user_stations)
     station_ids = @stations.collect(&:stid)
     stations_string = station_ids.join(",")
 
@@ -155,6 +155,10 @@ class StationsController < ApplicationController
           flash[:warning] = "You have already added this station to your profile."
         else
           current_user.stations << existing_station
+
+          user_station = existing_station.user_stations.find_by_user_id(current_user.id)
+          user_station.update(nickname: existing_station.name)
+
           flash[:success] = "Station has been added to your profile."
         end
       else
@@ -168,6 +172,10 @@ class StationsController < ApplicationController
         )
 
         current_user.stations << new_station
+
+        user_station = existing_station.user_stations.find_by_user_id(current_user.id)
+        user_station.update(nickname: new_station.name)
+
         flash[:success] = "Station has been added to your profile."
       end
 

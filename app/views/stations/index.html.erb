@@ -37,7 +37,7 @@
           <% @stations.each do |station| %>
 
             <tr data-stationId="<%= station[:id] %>">
-              <th scope="row" class="station-name"><%= station.name %></th>
+              <th scope="row" class="station-name"><%= station.user_stations.find_by_user_id(current_user.id).nickname %></th>
               <td class="text-center"><%= station.state %></td>
               <td class="text-center"><%= number_with_delimiter(station.elevation, delimiter: ',') %> ft.</td>
               <td class="text-center"><i class="edit-station-title-button fa fa-pencil-square-o" aria-hidden="true"></i></td>
@@ -213,7 +213,7 @@ var addHandlers = function() {
   addSaveStationClickHandler();
   addQuickViewClickHandler();
   addEditStationClickHandler();
-  addSaveStationClickHandler();
+  addUpdateStationClickHandler();
 };
 
 var getStationList = function() {
@@ -585,17 +585,19 @@ var addEditStationClickHandler = function() {
   $('.edit-station-title-button').click(onClick);
 };
 
-var addSaveStationClickHandler = function() {
-
-  var onSuccess = function(data) {
-    console.log(data)
-  };
+var addUpdateStationClickHandler = function() {
 
   var onSave = function(e) {
     var $target     = $(e.target);
     var $row        = $target.closest('tr');
+    var $name       = $row.find('.station-name');
     var stationId   = $row.attr('data-stationId');
     var nickname    = $row.find('.edit-station-title')[0].value;
+
+    var onSuccess = function(data) {
+      $name.empty();
+      $name.html(data.nickname);
+    };
 
     $.ajax({
        url: '/user_stations/' + stationId,

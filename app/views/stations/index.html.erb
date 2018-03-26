@@ -41,7 +41,7 @@
               <td class="text-center"><%= station.state %></td>
               <td class="text-center"><%= number_with_delimiter(station.elevation, delimiter: ',') %> ft.</td>
               <td class="text-center"><i class="edit-station-title-button fa fa-pencil-square-o" aria-hidden="true"></i></td>
-              <td class="text-center"><%= link_to '<i class="remove-station-button fa fa-trash-o" aria-hidden="true"></i>'.html_safe, station_path(station), method: :delete, data: { confirm: 'Are you sure?' } %></td>
+              <td class="text-center"><%= link_to '<i class="remove-station-button fa fa-trash-o" aria-hidden="true"></i>'.html_safe, station_path(station), method: :delete, data: { confirm: 'Are you sure you want to remove this station?' } %></td>
             </tr>
 
           <% end %>
@@ -55,7 +55,7 @@
 
 
 
-<div id="station-data-area" class="station station-list-item">
+<div id="station-data-area" class="station station-list-item hidden">
 
   <div class="station-header">
     <h2 class="station-title">Loading...</h2>
@@ -170,8 +170,8 @@ var defaultDaysBack = 3;
 
 var addHandlers = function() {
   addToggleSeriesHandler();
-  addStationButtonHandler();
-  addStationListClickHandler();
+  addNewStationButtonHandler();
+  addStationClickHandler();
   addSaveStationClickHandler();
   addQuickViewClickHandler();
   addEditStationClickHandler();
@@ -205,7 +205,7 @@ var getTimeSeriesData = function(stationId, daysBack, onSuccess) {
 };
 
 
-var addStationListClickHandler = function() {
+var addStationClickHandler = function() {
 
   var onClick = function(e) {
     var $target     = $(e.target);
@@ -213,7 +213,10 @@ var addStationListClickHandler = function() {
     var stationId   = $row.attr('data-stationId');
 
     if ($target.hasClass('edit-station-title-button') || $target.hasClass('remove-station-button') || $target.hasClass('edit-station-title') || $target.hasClass('save-station-title')) return;
-    document.getElementById('station-data-area').scrollIntoView({block: 'start', behavior: 'smooth'});
+
+    var $stationArea = $(document.getElementById('station-data-area'));
+    $stationArea.removeClass('hidden');
+    $stationArea[0].scrollIntoView({block: 'start', behavior: 'smooth'});
 
     var onStationDataRetrieved = function(data) {
       snowSense.chartHelper.drawTempChart(data);
@@ -227,7 +230,7 @@ var addStationListClickHandler = function() {
   $('.station-list .click-to-scroll tr').click(onClick);
 };
 
-var addStationButtonHandler = function() {
+var addNewStationButtonHandler = function() {
 
   var onClick = function(e) {
     var $target     = $(e.target);

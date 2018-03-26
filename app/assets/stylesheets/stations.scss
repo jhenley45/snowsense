@@ -33,6 +33,38 @@
         cursor: pointer;
       }
     }
+
+    .edit-station-title-button {
+      font-size: 20px;
+
+      &:hover {
+        color: $primary-color;
+        cursor: pointer;
+      }
+    }
+
+    .remove-station-button {
+      color: rgba(0, 0, 0, 0.87);
+      font-size: 20px;
+
+      &:hover {
+        color: #d84315;
+        cursor: pointer;
+      }
+    }
+
+    .edit-station-title {
+      background-color: white;
+      border-radius: 5px;
+      padding: 0 10px;
+      width: 80%;
+      margin: 0;
+    }
+
+    .save-station-title {
+      margin-left: 10px;
+      font-weight: normal;
+    }
   }
 }
 

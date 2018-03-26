@@ -22,12 +22,13 @@
 
   <div class="station-list-content">
     <% if @stations.length > 0 %>
-      <table class="table station-table click-to-scroll highlight responsive-table bordered">
+      <table class="table station-table click-to-scroll highlight bordered">
         <thead>
           <tr>
             <th scope="col"></th>
             <th class="text-center" scope="col">State</th>
             <th class="text-center" scope="col">Elevation</th>
+            <th class="text-center" scope="col"></th>
             <th class="text-center" scope="col"></th>
           </tr>
         </thead>
@@ -39,7 +40,8 @@
               <th scope="row" class="station-name"><%= station.name %></th>
               <td class="text-center"><%= station.state %></td>
               <td class="text-center"><%= number_with_delimiter(station.elevation, delimiter: ',') %> ft.</td>
-              <td class="text-center"><%= link_to 'Remove', station_path(station), method: :delete, data: { confirm: 'Are you sure?' } %></td>
+              <td class="text-center"><i class="edit-station-title-button fa fa-pencil-square-o" aria-hidden="true"></i></td>
+              <td class="text-center"><%= link_to '<i class="remove-station-button fa fa-trash-o" aria-hidden="true"></i>'.html_safe, station_path(station), method: :delete, data: { confirm: 'Are you sure?' } %></td>
             </tr>
 
           <% end %>
@@ -58,7 +60,7 @@
   <div class="station station-list-item">
 
     <div class="station-header" id="station-<%= station[:id] %>">
-      <h2 class="station-title"><%= station[:name] %> (<%= station[:stid] %>)</h2>
+      <h2 class="station-title"><%= station[:name] %></h2>
     </div>
 
     <div class="station-content">
@@ -176,18 +178,15 @@
 <script>
 
 
-
-
 // TODO list
-// add date selection
+// add date selection, remove days back functionality/code
+// Fix categories to show less, or to show days back
 // refactor out AJAX
 // Mark times when faceting could occur on temp graph
 // Allow user to create nickname for station
 // Add ability to order stations w drag and drop
 // Ensure data point only every 15 minutes
 // Precipitation density graph
-// Add map of stations, click to go to station info
-// Add map of stations when adding a new station
 
 $(document).ready(function() {
 
@@ -213,6 +212,8 @@ var addHandlers = function() {
   addStationListClickHandler();
   addSaveStationClickHandler();
   addQuickViewClickHandler();
+  addEditStationClickHandler();
+  addSaveStationClickHandler();
 };
 
 var getStationList = function() {
@@ -262,6 +263,8 @@ var addStationListClickHandler = function() {
     var $target     = $(e.target);
     var $row        = $target.closest('tr');
     var stationId   = $row.attr('data-stationId');
+
+    if ($target.hasClass('edit-station-title-button') || $target.hasClass('remove-station-button') || $target.hasClass('edit-station-title') || $target.hasClass('save-station-title')) return;
 
     document.getElementById('station-' + stationId).scrollIntoView({block: 'start', behavior: 'smooth'});
   };
@@ -566,6 +569,52 @@ var addQuickViewClickHandler = function() {
   $('.modal').modal();                                                          // Initialize modals
   $('body').on('click', 'a.right', onClick);
 };
+
+var addEditStationClickHandler = function() {
+
+  var onClick = function(e) {
+    var $target = $(e.target);
+    var $row = $target.closest('tr');
+    var $name = $row.find('.station-name');
+
+    $name.html($('<input class="edit-station-title" value="' + $name[0].innerText + '">'));
+    $name.find('input').focus();
+    $name.append($('<a class="generic-button save-station-title">Save</a>'));
+  };
+
+  $('.edit-station-title-button').click(onClick);
+};
+
+var addSaveStationClickHandler = function() {
+
+  var onSuccess = function(data) {
+    console.log(data)
+  };
+
+  var onSave = function(e) {
+    var $target     = $(e.target);
+    var $row        = $target.closest('tr');
+    var stationId   = $row.attr('data-stationId');
+    var nickname    = $row.find('.edit-station-title')[0].value;
+
+    $.ajax({
+       url: '/user_stations/' + stationId,
+       data: {
+          format:     'json',
+          nickname:   nickname
+       },
+       dataType: 'json',
+       type: 'PATCH'
+    }).done(function(data) {
+        onSuccess(data)
+    }).fail(function(error) {
+        console.log(error);
+    });
+
+  };
+
+  $('body').on('click', '.save-station-title', onSave);
+}
 
 
 </script>

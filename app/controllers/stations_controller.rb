@@ -14,6 +14,8 @@ class StationsController < ApplicationController
     @station_data = []
 
     @stations = current_user.stations.includes(:user_stations)
+    gon.stations = @stations
+    gon.user_stations = current_user.user_stations
     station_ids = @stations.collect(&:stid)
     stations_string = station_ids.join(",")
 

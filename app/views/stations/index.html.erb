@@ -58,11 +58,11 @@
 <div id="station-data-area" class="station station-list-item">
 
   <div class="station-header">
-    <h2 class="station-title">STATION NAME</h2>
+    <h2 class="station-title">Loading...</h2>
   </div>
 
   <div class="station-content">
-      <div class="data-header">ADD TITLE</div class="data-header">
+      <div class="data-header">ADD TITLE</div>
 
       <table class="table station-table striped">
         <thead>
@@ -82,7 +82,7 @@
 
       <div class="row chart-block">
         <div class="col-md-4">
-          <div class="data-header">Temperature</div class="data-header">
+          <div class="data-header">Temperature</div>
         </div>
 
         <div id="temperature-chart" class="temperature-chart chart loading-icon" ></div>
@@ -91,7 +91,7 @@
 
       <div class="row chart-block">
         <div class="col-md-4">
-          <div class="data-header">Wind</div class="data-header">
+          <div class="data-header">Wind</div>
         </div>
 
         <div class="col-md-4 toggle-buttons">
@@ -120,7 +120,7 @@
 
         <div class="row chart-block">
           <div class="col-md-4">
-            <div class="data-header">Temperature</div class="data-header">
+            <div class="data-header">Temperature</div>
           </div>
 
           <div class="temperature-chart chart"></div>
@@ -129,7 +129,7 @@
 
         <div class="row chart-block">
           <div class="col-md-4">
-            <div class="data-header">Wind</div class="data-header">
+            <div class="data-header">Wind</div>
           </div>
 
           <div class="col-md-4 toggle-buttons">
@@ -153,10 +153,10 @@
 // Fix categories to show less, or to show days back
 // refactor out AJAX
 // Mark times when faceting could occur on temp graph
-// Allow user to create nickname for station
 // Add ability to order stations w drag and drop
 // Ensure data point only every 15 minutes
 // Precipitation density graph
+// Snow settlement graph
 
 $(document).ready(function() {
 
@@ -168,11 +168,6 @@ $(document).ready(function() {
 var stations;
 var defaultDaysBack = 3;
 
-var onInitialChartLoad = function(data) {
-  snowSense.chartHelper.drawTempChart(data);
-  snowSense.chartHelper.drawWindChart(data);
-};
-
 var addHandlers = function() {
   addToggleSeriesHandler();
   addStationButtonHandler();
@@ -183,6 +178,14 @@ var addHandlers = function() {
   addUpdateStationClickHandler();
 };
 
+var setStationTitle = function(stationId) {
+  var station       = snowSense.arrayHelper.findItemByValue(gon.stations, parseInt(stationId), 'id');
+  var $stationArea  = $('#station-data-area');
+  var $stationTitle = $stationArea.find('.station-title');
+  var userStation   = snowSense.arrayHelper.findItemByValue(gon.userStations, station.id, 'station_id');
+
+  $stationTitle.html(userStation.nickname);
+};
 
 var getTimeSeriesData = function(stationId, daysBack, onSuccess) {
   var url = '/stations/' + stationId + '/timeseries';
@@ -203,16 +206,22 @@ var getTimeSeriesData = function(stationId, daysBack, onSuccess) {
 
 
 var addStationListClickHandler = function() {
+
   var onClick = function(e) {
     var $target     = $(e.target);
     var $row        = $target.closest('tr');
     var stationId   = $row.attr('data-stationId');
 
     if ($target.hasClass('edit-station-title-button') || $target.hasClass('remove-station-button') || $target.hasClass('edit-station-title') || $target.hasClass('save-station-title')) return;
-
     document.getElementById('station-data-area').scrollIntoView({block: 'start', behavior: 'smooth'});
 
-    getTimeSeriesData(stationId, defaultDaysBack, onInitialChartLoad);
+    var onStationDataRetrieved = function(data) {
+      snowSense.chartHelper.drawTempChart(data);
+      snowSense.chartHelper.drawWindChart(data);
+    };
+
+    setStationTitle(stationId);
+    getTimeSeriesData(stationId, defaultDaysBack, onStationDataRetrieved);
   };
 
   $('.station-list .click-to-scroll tr').click(onClick);
@@ -296,7 +305,7 @@ var addToggleSeriesHandler = function() {
 
 
 
-var stations = new Bloodhound({
+var lookupStations = new Bloodhound({
   datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
   queryTokenizer: Bloodhound.tokenizers.whitespace,
   remote: {
@@ -314,7 +323,7 @@ $('#new-station .typeahead').typeahead({
   },
   {
     name: 'states',
-    source: stations,
+    source: lookupStations,
     limit: 10,
     templates: {
     suggestion: function (station) {

@@ -109,42 +109,6 @@
 
 
 
-  <!-- Modal Structure -->
-  <div id="quick-view-modal" class="modal">
-    <div class="modal-content station">
-      <div class="station-header">
-        <h2 class="station-title"></h2>
-      </div>
-
-      <section class="charts station-content">
-
-        <div class="row chart-block">
-          <div class="col-md-4">
-            <div class="data-header">Temperature</div>
-          </div>
-
-          <div class="temperature-chart chart"></div>
-        </div>
-
-
-        <div class="row chart-block">
-          <div class="col-md-4">
-            <div class="data-header">Wind</div>
-          </div>
-
-          <div class="col-md-4 toggle-buttons">
-            <button class="toggle-button active" data-seriesId="windGust">Gusts</button>
-            <button class="toggle-button active" data-seriesId="windSpeed">Wind</button>
-          </div>
-
-          <div class="wind-chart chart"></div>
-        </div>
-
-      </section>
-
-    </div>
-  </div>
-
 <script>
 
 
@@ -162,11 +126,17 @@ $(document).ready(function() {
 
   initializeMap();
   addHandlers();
+  setReferences();
 
 });
 
 var stations;
 var defaultDaysBack = 3;
+
+var $stationArea;
+var $stationTitle;
+var $temperatureChart;
+var $windChart;
 
 var addHandlers = function() {
   addToggleSeriesHandler();
@@ -178,13 +148,22 @@ var addHandlers = function() {
   addUpdateStationClickHandler();
 };
 
-var setStationTitle = function(stationId) {
+var setReferences = function() {
+  $stationArea      = $('#station-data-area');
+  $stationTitle     = $stationArea.find('.station-title');
+  $temperatureChart = $stationArea.find('.temperature-chart');
+  $windChart        = $stationArea.find('.wind-chart');
+};
+
+var setStationTitle = function(title) {
+  $stationTitle.html(title);
+};
+
+var setUserStationTitle = function(stationId) {
   var station       = snowSense.arrayHelper.findItemByValue(gon.stations, parseInt(stationId), 'id');
-  var $stationArea  = $('#station-data-area');
-  var $stationTitle = $stationArea.find('.station-title');
   var userStation   = snowSense.arrayHelper.findItemByValue(gon.userStations, station.id, 'station_id');
 
-  $stationTitle.html(userStation.nickname);
+  setStationTitle(userStation.nickname);
 };
 
 var getTimeSeriesData = function(stationId, daysBack, onSuccess) {
@@ -204,6 +183,15 @@ var getTimeSeriesData = function(stationId, daysBack, onSuccess) {
   });
 };
 
+var showStationArea = function() {
+  $stationArea.removeClass('hidden');
+  $stationArea[0].scrollIntoView({block: 'start', behavior: 'smooth'});
+};
+
+var onStationDataRetrieved = function(data) {
+  snowSense.chartHelper.drawTempChart(data);
+  snowSense.chartHelper.drawWindChart(data);
+};
 
 var addStationClickHandler = function() {
 
@@ -214,16 +202,8 @@ var addStationClickHandler = function() {
 
     if ($target.hasClass('edit-station-title-button') || $target.hasClass('remove-station-button') || $target.hasClass('edit-station-title') || $target.hasClass('save-station-title')) return;
 
-    var $stationArea = $(document.getElementById('station-data-area'));
-    $stationArea.removeClass('hidden');
-    $stationArea[0].scrollIntoView({block: 'start', behavior: 'smooth'});
-
-    var onStationDataRetrieved = function(data) {
-      snowSense.chartHelper.drawTempChart(data);
-      snowSense.chartHelper.drawWindChart(data);
-    };
-
-    setStationTitle(stationId);
+    showStationArea();
+    setUserStationTitle(stationId);
     getTimeSeriesData(stationId, defaultDaysBack, onStationDataRetrieved);
   };
 
@@ -246,41 +226,12 @@ var addNewStationButtonHandler = function() {
 
 };
 
-var fetchWindData = function(station, daysBack, chart) {
+var fetchChartData = function(station, daysBack, chart) {
 
   snowSense.chartHelper.removeAllSeries(chart);
   chart.showLoading();
 
-  var onSuccess = function(data, station) {
-    var windSpeedData   = data.map(function(datum) { return datum.wind_speed });
-    var windCategories  = data.map(function(datum) { return new Date(datum.date_time).toLocaleString("en-US") });
-    var windGustData    = data.map(function(datum) { return datum.wind_gusts });
-
-    snowSense.chartHelper.addWindSpeedSeries(chart, windSpeedData);
-    snowSense.chartHelper.addWindGustSeries(chart, windGustData);
-    snowSense.chartHelper.addWindDirectionSeries(chart, data);
-    chart.xAxis[0].setCategories(windCategories);
-    chart.hideLoading();
-  };
-
-  getTimeSeriesData(station, daysBack, onSuccess);
-};
-
-var fetchTemperatureData = function(station, daysBack, chart) {
-
-  snowSense.chartHelper.removeAllSeries(chart);
-  chart.showLoading();
-
-  var onSuccess = function(data, station) {
-    var tempData        = data.map(function(datum) { return datum.temperature });
-    var tempCategories  = data.map(function(datum) { return new Date(datum.date_time).toLocaleString("en-US") });
-
-    chart.addSeries({ data: tempData });
-    chart.xAxis[0].setCategories(tempCategories);
-    chart.hideLoading();
-  };
-
-  getTimeSeriesData(station, daysBack, onSuccess);
+  getTimeSeriesData(station.id, daysBack, onStationDataRetrieved);
 };
 
 
@@ -451,25 +402,18 @@ var addQuickViewClickHandler = function() {
     var stationId   = $popup.attr('data-stationId');
     var id          = $popup.attr('data-id');
     var title       = $popup.find('.title')[0].innerText;
-    var $modal      = $('#quick-view-modal');
-    var $tempChart  = $modal.find('.temperature-chart');
-    var $windChart  = $modal.find('.wind-chart');
-
-    $tempChart.attr('id', 'temperature-chart-' + stationId);
-    $windChart.attr('id', 'wind-chart-' + stationId);
-    $modal.find('.station-title').text(title);
-    $modal.modal('open');
 
     var daysBack    = defaultDaysBack;
     var station     = {id: id, station: title, stid: stationId};
     var windChart   = snowSense.chartHelper.initializeEmptyWindChart($windChart);
-    var tempChart   = snowSense.chartHelper.initializeEmptyTemperatureChart($tempChart);
+    var tempChart   = snowSense.chartHelper.initializeEmptyTemperatureChart($temperatureChart);
 
-    fetchTemperatureData(station, daysBack, tempChart);
-    fetchWindData(station, daysBack, windChart);
+    showStationArea();
+    setStationTitle(title);
+    fetchChartData(station, daysBack, tempChart);
+    fetchChartData(station, daysBack, windChart);
   };
 
-  $('.modal').modal();                                                          // Initialize modals
   $('body').on('click', 'a.right', onClick);
 };
 

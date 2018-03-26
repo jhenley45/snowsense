@@ -25,7 +25,7 @@ if (!snowSense) var snowSense = {};
 
     var chart = $element.highcharts({
       chart: {
-          type: 'line'
+          type: 'spline'
       },
       title: {
           text: 'Recent Wind Speed'
@@ -76,7 +76,7 @@ if (!snowSense) var snowSense = {};
 
     var chart = $element.highcharts({
       chart: {
-          type: 'line'
+          type: 'spline'
       },
       title: {
           text: 'Recent Temperature'
@@ -123,6 +123,7 @@ if (!snowSense) var snowSense = {};
     var windCategories;
     var windGustData;
     var element = 'wind-chart';
+    var $chartElement = $('#' + element);
 
     windSpeedData     = data.map(function(datum) { return datum.wind_speed });
     windCategories    = data.map(function(datum) { return new Date(datum.date_time).toLocaleString("en-US") });
@@ -131,15 +132,16 @@ if (!snowSense) var snowSense = {};
     var windDirectionData = createWindDirectionData(data);
 
     if (isNullDataSet(windSpeedData)) {
-      addNoDataChart($('#' + element));
+      addNoDataChart($chartElement);
       return;
     }
 
-    $('#' + element).removeClass('loading-icon');
+    showChart($chartElement);
+    $chartElement.removeClass('loading-icon');
 
     Highcharts.chart(element, {
         chart: {
-            type: 'line'
+            type: 'spline'
         },
         title: {
             text: 'Recent Wind Speed'
@@ -208,7 +210,7 @@ if (!snowSense) var snowSense = {};
 
     Highcharts.chart(element, {
         chart: {
-            type: 'line',
+            type: 'spline',
         },
         title: {
             text: 'Recent Temperature'
@@ -291,9 +293,14 @@ if (!snowSense) var snowSense = {};
 
   // ---------- PRIVATE FUNCTIONS ----------
 
+  function showChart($element) {
+    var chartBlock  = $element.closest('.chart-block');
+    chartBlock.removeClass('hidden');
+  }
+
   function addNoDataChart($element) {
-    var chartBlock   = $element.closest('.chart-block');
-    chartBlock.empty();
+    var chartBlock  = $element.closest('.chart-block');
+    chartBlock.addClass('hidden');
   };
 
   // TODO change this so that it checks to see if ALL data is null, not just one piece.

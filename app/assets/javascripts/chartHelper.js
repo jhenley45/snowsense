@@ -117,12 +117,12 @@ if (!snowSense) var snowSense = {};
     return chart.highcharts();
   };
 
-  function drawWindChart(data, stid) {
+  function drawWindChart(data) {
 
     var windSpeedData;
     var windCategories;
     var windGustData;
-    var element = 'wind-chart-' + stid;
+    var element = 'wind-chart';
 
     windSpeedData     = data.map(function(datum) { return datum.wind_speed });
     windCategories    = data.map(function(datum) { return new Date(datum.date_time).toLocaleString("en-US") });
@@ -194,7 +194,7 @@ if (!snowSense) var snowSense = {};
 
   }
 
-  function drawTempChart(data, stid) {
+  function drawTempChart(data) {
 
     var tempData;
     var tempCategories;
@@ -202,7 +202,7 @@ if (!snowSense) var snowSense = {};
     tempData        = data.map(function(datum) { return datum.temperature });
     tempCategories  = data.map(function(datum) { return new Date(datum.date_time).toLocaleString("en-US") });
 
-    var element = 'temperature-chart-' + stid;
+    var element = 'temperature-chart';
 
     $('#' + element).removeClass('loading-icon');
 

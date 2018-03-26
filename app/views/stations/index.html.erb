@@ -55,88 +55,58 @@
 
 
 
-<% @station_data.each do |station| %>
+<div id="station-data-area" class="station station-list-item">
 
-  <div class="station station-list-item">
-
-    <div class="station-header" id="station-<%= station[:id] %>">
-      <h2 class="station-title"><%= station[:name] %></h2>
-    </div>
-
-    <div class="station-content">
-      <% station[:tables].each do |table| %>
-        <div class="data-header"><%= table[:title] %></div class="data-header">
-
-        <table class="table station-table striped">
-          <thead>
-            <tr>
-              <th scope="col"></th>
-              <th class="text-center" scope="col">Past 24</th>
-              <th class="text-center" scope="col">Past 48</th>
-              <th class="text-center" scope="col">Past 72</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% table[:rows].each do |datum| %>
-              <tr>
-                <th scope="row"><%= table[:short_title] %> <%= datum[:spec] %></th>
-                <td class="text-center"><%= number_with_precision(datum[:hourly][:twenty_four], precision: 0) || 'N/A' %></td>
-                <td class="text-center"><%= number_with_precision(datum[:hourly][:fourty_eight], precision: 0) || 'N/A' %></td>
-                <td class="text-center"><%= number_with_precision(datum[:hourly][:seventy_two], precision: 0) || 'N/A' %></td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
-
-      <% end %>
-
-      <section class="charts">
-
-        <div class="row chart-block">
-          <div class="col-md-4">
-            <div class="data-header">Temperature</div class="data-header">
-          </div>
-
-          <div class="day-selector col-md-4 pull-right">
-            <span>Go back
-              <input class="days-back"> days
-              <button class="change-days" data-chartType="temperature">GO</button>
-            </span>
-
-          </div>
-          <div id="temperature-chart-<%= station[:stid] %>" class="temperature-chart chart loading-icon" data-stationId="<%= station[:id] %>"></div>
-        </div>
-
-
-        <div class="row chart-block">
-          <div class="col-md-4">
-            <div class="data-header">Wind</div class="data-header">
-          </div>
-
-          <div class="col-md-4 toggle-buttons">
-            <button class="toggle-button active" data-seriesId="windGust">Gusts</button>
-            <button class="toggle-button active" data-seriesId="windSpeed">Wind</button>
-          </div>
-
-          <div class="day-selector col-md-4 pull-right">
-            <span>Go back
-              <input class="days-back"> days
-              <button class="change-days" data-chartType="wind">GO</button>
-            </span>
-
-          </div>
-          <div id="wind-chart-<%= station[:stid] %>" class="wind-chart chart loading-icon" data-stationId="<%= station[:id] %>"></div>
-        </div>
-
-      </section>
-
-    </div>
-
-
-
+  <div class="station-header">
+    <h2 class="station-title">STATION NAME</h2>
   </div>
 
-<% end %>
+  <div class="station-content">
+      <div class="data-header">ADD TITLE</div class="data-header">
+
+      <table class="table station-table striped">
+        <thead>
+          <tr>
+            <th scope="col"></th>
+            <th class="text-center" scope="col">Past 24</th>
+            <th class="text-center" scope="col">Past 48</th>
+            <th class="text-center" scope="col">Past 72</th>
+          </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+      </table>
+
+    <section class="charts">
+
+      <div class="row chart-block">
+        <div class="col-md-4">
+          <div class="data-header">Temperature</div class="data-header">
+        </div>
+
+        <div id="temperature-chart" class="temperature-chart chart loading-icon" ></div>
+      </div>
+
+
+      <div class="row chart-block">
+        <div class="col-md-4">
+          <div class="data-header">Wind</div class="data-header">
+        </div>
+
+        <div class="col-md-4 toggle-buttons">
+          <button class="toggle-button active" data-seriesId="windGust">Gusts</button>
+          <button class="toggle-button active" data-seriesId="windSpeed">Wind</button>
+        </div>
+
+        <div id="wind-chart" class="wind-chart chart loading-icon"></div>
+      </div>
+
+    </section>
+
+  </div>
+</div>
+
 
 
   <!-- Modal Structure -->
@@ -153,7 +123,7 @@
             <div class="data-header">Temperature</div class="data-header">
           </div>
 
-          <div id="" class="temperature-chart chart"></div>
+          <div class="temperature-chart chart"></div>
         </div>
 
 
@@ -167,7 +137,7 @@
             <button class="toggle-button active" data-seriesId="windSpeed">Wind</button>
           </div>
 
-          <div id="" class="wind-chart chart"></div>
+          <div class="wind-chart chart"></div>
         </div>
 
       </section>
@@ -191,22 +161,19 @@
 $(document).ready(function() {
 
   initializeMap();
-  getStationList();
   addHandlers();
-  addDefaultDaysBack();
 
 });
 
 var stations;
 var defaultDaysBack = 3;
 
-var onInitialChartLoad = function(data, station) {
-  snowSense.chartHelper.drawTempChart(data, station.stid);
-  snowSense.chartHelper.drawWindChart(data, station.stid);
+var onInitialChartLoad = function(data) {
+  snowSense.chartHelper.drawTempChart(data);
+  snowSense.chartHelper.drawWindChart(data);
 };
 
 var addHandlers = function() {
-  addDaysBackInputHandler();
   addToggleSeriesHandler();
   addStationButtonHandler();
   addStationListClickHandler();
@@ -216,25 +183,9 @@ var addHandlers = function() {
   addUpdateStationClickHandler();
 };
 
-var getStationList = function() {
-  $.ajax({
-     url: '/station_list',
-     dataType: 'json',
-     type: 'GET'
-  }).done(function(data) {
-      stations = data;
 
-      data.forEach(function(station) {
-        getTimeSeriesData(station, defaultDaysBack, onInitialChartLoad);
-      });
-  }).fail(function(error) {
-      console.log(error);
-  });
-};
-
-
-var getTimeSeriesData = function(station, daysBack, onSuccess) {
-  var url = '/stations/' + station.id + '/timeseries';
+var getTimeSeriesData = function(stationId, daysBack, onSuccess) {
+  var url = '/stations/' + stationId + '/timeseries';
   $.ajax({
      url: url,
      data: {
@@ -244,19 +195,12 @@ var getTimeSeriesData = function(station, daysBack, onSuccess) {
      dataType: 'json',
      type: 'GET'
   }).done(function(data) {
-      onSuccess(data, station)
+      onSuccess(data)
   }).fail(function(error) {
       console.log(error);
   });
 };
 
-
-var addDefaultDaysBack = function() {
-
-  var inputs = $('.day-selector input');
-  inputs.val(defaultDaysBack);
-
-};
 
 var addStationListClickHandler = function() {
   var onClick = function(e) {
@@ -266,7 +210,9 @@ var addStationListClickHandler = function() {
 
     if ($target.hasClass('edit-station-title-button') || $target.hasClass('remove-station-button') || $target.hasClass('edit-station-title') || $target.hasClass('save-station-title')) return;
 
-    document.getElementById('station-' + stationId).scrollIntoView({block: 'start', behavior: 'smooth'});
+    document.getElementById('station-data-area').scrollIntoView({block: 'start', behavior: 'smooth'});
+
+    getTimeSeriesData(stationId, defaultDaysBack, onInitialChartLoad);
   };
 
   $('.station-list .click-to-scroll tr').click(onClick);
@@ -325,43 +271,6 @@ var fetchTemperatureData = function(station, daysBack, chart) {
   getTimeSeriesData(station, daysBack, onSuccess);
 };
 
-var addDaysBackInputHandler = function() {
-
-  var fetchData = function(e) {
-    var $target     = $(e.target);
-    var $chartBlock = $target.closest('.chart-block');
-    var $chart      = $chartBlock.find('.chart');
-    var daysBack    = $chartBlock.find('.days-back').val();
-    var stationId   = $chart.attr('data-stationId');
-    var station     = findStation(parseInt(stationId));
-    var chartType   = $target.attr('data-chartType');
-    var chart       = $chart.highcharts();
-
-    if (chartType === 'temperature')    fetchTemperatureData(station, daysBack, chart);
-    else if (chartType === 'wind')      fetchWindData(station, daysBack, chart);
-  };
-
-  var handleInput = function(e) {
-    var $target     = $(e.target);
-    var $selector   = $target.closest('.day-selector');
-    var daysBack    = $selector.find('.days-back').val();
-
-    removeError($selector);
-
-    var error = undefined;
-
-    if (!parseInt(daysBack)) {
-      error = "You must input a number.";
-    } else if (parseInt(daysBack) > 60) {
-      error = "You may only look back 60 days";
-    }
-
-    if (error) addError(error, $selector);
-    else fetchData(e);
-  };
-
-  $('.change-days').click(handleInput);
-};
 
 var addToggleSeriesHandler = function() {
 
@@ -385,24 +294,6 @@ var addToggleSeriesHandler = function() {
   $('.toggle-button').click(onClick);
 }
 
-var findStation = function(stationId) {
-    for (var i = 0, len = stations.length; i < len; i++) {
-        if (stations[i].id === stationId) return stations[i]; // Return as soon as the object is found
-    }
-    return null; // The object was not found
-};
-
-
-var addError = function(text, $element) {
-  var $span = $('<span class="error-message">' + text + '</span>');
-  $element.append($span);
-};
-
-
-var removeError = function($element) {
-  var $errorMessage = $element.find('.error-message');
-  if ($errorMessage.length > 0) $errorMessage.remove();
-};
 
 
 var stations = new Bloodhound({
